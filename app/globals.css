@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+
+
+/* ==========================
+   Colors Variables
+========================== */
+
+/* Default (Dark) */
+:root {
+  --color-bg: #000;
+  --color-text: #fff;
+  --color-card: #111;
+  --color-border: #333;
+}
+
+/* Inverted (Light) */
+html[data-theme="light"] {
+  --color-bg: #fff;
+  --color-text: #000;
+  --color-card: #eee;
+  --color-border: #ccc;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  background: var(--color-bg);
+  color: var(--color-text);
+  scroll-behavior: smooth;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Selection color inverse */
+::selection {
+  background: var(--color-text);
+  color: var(--color-bg);
+}

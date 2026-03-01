@@ -1,0 +1,109 @@
+.container {
+  background: var(--color-bg);
+  color: var(--color-text);
+  padding: 120px 10%;
+}
+
+/* Hero Section */
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 60px;
+  margin-bottom: 120px;
+}
+
+.title {
+  font-size: clamp(4rem, 12vw, 10rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  color: var(--color-text);
+  align-items: baseline;
+  margin-top: 250px;
+}
+.dash {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin-top: 20px;
+}
+
+.imageWrapper {
+  flex-shrink: 0;
+}
+
+.image {
+  object-fit: cover;
+    width: 800px;
+    height: 600px;
+    flex-direction: column;
+    margin-top: 500px;
+    
+
+}
+
+/* About Text */
+.aboutText {
+  max-width: 700px;
+  margin-bottom: 120px;
+  margin-left: 700px;
+}
+
+.description {
+  font-size: 1.8rem;
+  font-weight: 900;
+  margin-bottom: 30px;
+  font-weight: bold;
+}
+
+.smallText {
+  font-size: 1rem;
+  opacity: 0.7;
+  line-height: 1.6;
+}
+
+/* Quote Section */
+.quoteSection {
+  max-width: 600px;
+  margin-bottom: 120px;
+}
+
+.quoteSection blockquote {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.quoteLine {
+  display: block;
+  width: 60px;
+  height: 2px;
+  background: var(--color-text);
+  margin-top: 20px;
+}
+
+/* Bottom Section */
+.bottom h2 {
+  font-size: 3rem;
+  font-weight: 800;
+}
+
+.bottom p {
+  margin-top: 20px;
+  opacity: 0.6;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .hero {
+    flex-direction: column;
+  }
+
+  .title {
+    font-size: 3rem;
+  }
+
+  .imageWrapper {
+    width: 100%;
+  }
+}

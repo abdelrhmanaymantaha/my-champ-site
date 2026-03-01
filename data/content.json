@@ -1,0 +1,35 @@
+{
+  "hero": {
+    "title": "Aleven",
+    "tagline": "the studio →",
+    "bulletPoints": [
+      "Custom animated illustrations tailored to your idea or brand.",
+      "Creative collages with dynamic motion.",
+      "Typography animations that bring words to life.",
+      "Seamless looping animations ideal for social media, ads, websites, or presentations.",
+      "High-resolution GIFs and video exports optimized for all platforms.",
+      "Whether you want something playful, artistic, or sleek and professional, I can design GIF animations that stand out, engage, and tell your story in motion."
+    ]
+  },
+  "about": {
+    "title": "Please Call Me aleven",
+    "subtitle": "— Motion Designer —",
+    "mainText": "At Aleven , \ncreativity moves with purpose.\n\nI transform concepts into dynamic visual stories, blending innovation with refined design to create animations that inspire, engage, and leave a lasting impression. Every frame is crafted with intention-turning imagination into impactful digital experiences.",
+    "description": "Specializing in seamless looping animations, high-resolution GIFs, and platform-optimized video exports — I design motion that captures attention and tells stories visually.",
+    "quote": "\" Driven by a passion for bold visuals and creative motion, every piece I create goes beyond animation.\"",
+    "bottomTitle": "it's art\n— in motion.",
+    "bottomText": "I love pushing the limits of visual storytelling."
+  },
+  "play": {
+    "text": "A creative playground for experimental visuals, animations, and interactive ideas."
+  },
+  "navbar": {
+    "name": "Please call me Aleven",
+    "location": " Riyadh, Saudi Arabia"
+  },
+  "sections": {
+    "about": "About",
+    "projects": "Projects",
+    "play": "Play"
+  }
+}
