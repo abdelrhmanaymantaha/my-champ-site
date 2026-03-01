@@ -6,7 +6,6 @@ import Link from "next/link";
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-<<<<<<< HEAD
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -36,17 +35,6 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="w-full max-w-md px-8 py-12 border border-[var(--color-border)] rounded-lg">
-=======
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement login logic
-    console.log("Login attempt:", { email, password });
-  };
-
-  return (
-    <div className="w-full max-w-md px-8 py-12 border border-[var(--color-border)] rounded-lg">
->>>>>>> 6478bb1c8413e0f4befcbf58c1b3228653c12b46
       <h1 className="text-2xl font-bold mb-8 text-center">Admin Login</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
@@ -77,7 +65,6 @@ export default function AdminLoginPage() {
             placeholder="••••••••"
           />
         </div>
-<<<<<<< HEAD
         {message && (
           <p
             className={`text-sm ${
@@ -97,27 +84,11 @@ export default function AdminLoginPage() {
         <Link
           href="/"
           className="block text-center text-sm opacity-70 hover:opacity-100 transition"
-=======
-        <button
-          type="submit"
-          className="w-full py-3 font-semibold bg-[var(--color-text)] text-[var(--color-bg)] rounded hover:opacity-90 transition"
-        >
-          Sign In
-        </button>
-        <Link
-          href="/"
-          className="block text-center text-sm opacity-70 hover:opacity-100 transition mt-4"
->>>>>>> 6478bb1c8413e0f4befcbf58c1b3228653c12b46
         >
           ← Back to site
         </Link>
       </form>
     </div>
-<<<<<<< HEAD
     </div>
   );
 }
-=======
-  );
-}
->>>>>>> 6478bb1c8413e0f4befcbf58c1b3228653c12b46

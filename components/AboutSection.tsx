@@ -22,7 +22,6 @@ export default function About({ content }: { content: AboutContent }) {
     <main className={styles.container}>
       <section className={styles.hero}>
         <h1 className={styles.title}>
-<<<<<<< HEAD
           {firstWord}
           {rest && (
             <>
@@ -30,11 +29,6 @@ export default function About({ content }: { content: AboutContent }) {
             </>
           )}
           <span className={styles.dash}>{content.subtitle}</span>
-=======
-          Please <br /> Call Me aleven 
-          
-          <span className={styles.dash}> — Motion Designer —</span>
->>>>>>> 6478bb1c8413e0f4befcbf58c1b3228653c12b46
         </h1>
 
         <div className={styles.imageWrapper}>

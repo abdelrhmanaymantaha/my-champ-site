@@ -32,7 +32,12 @@ export default async function ProjectPage({ params }: Props) {
         ← Back to projects
       </Link>
 
-      <h1 className="text-4xl md:text-6xl font-bold mb-8">{project.title}</h1>
+      <h1 className="text-4xl md:text-6xl font-bold mb-2">{project.title}</h1>
+      {project.slug && (
+        <p className="text-sm opacity-70 mb-8 uppercase tracking-wide">
+          {project.slug.replace(/-/g, ", ")}
+        </p>
+      )}
 
       {project.description && (
         <p className="text-lg opacity-90 mb-16 leading-relaxed whitespace-pre-line">

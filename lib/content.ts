@@ -101,6 +101,16 @@ function slugify(title: string): string {
   return title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
+/** Normalize slug for comparison: decode URL, trim, then slugify so URL and API slugs match */
+function normalizeSlugForMatch(s: string): string {
+  try {
+    const decoded = decodeURIComponent(s).trim();
+    return decoded.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || decoded;
+  } catch {
+    return s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || s;
+  }
+}
+
 function migrateProject(p: unknown): Project {
   if (p && typeof p === "object" && "title" in p && "gif" in p) {
     const pr = p as Record<string, unknown>;
@@ -130,18 +140,23 @@ function migrateProjects(parsed: unknown): ProjectsContent {
 }
 
 export async function getProjectBySlug(slug: string): Promise<{ project: Project; section: "branding" | "motion" } | null> {
-  const { fetchProjectsFromApi } = await import("@/lib/projects-api");
+  const { fetchProjectsFromApi, fetchProjectByIdFromApi } = await import("@/lib/projects-api");
   const apiProjects = await fetchProjectsFromApi();
+  const normalizedSlug = normalizeSlugForMatch(slug);
   for (const p of apiProjects) {
-    if (p.slug === slug) {
+    const apiSlug = (p.slug ?? "").trim();
+    if (apiSlug === slug || apiSlug === normalizedSlug || normalizeSlugForMatch(apiSlug) === normalizedSlug) {
       const section = p.project_type === "motion" ? "motion" : "branding";
+      // Fetch full project by ID so we get description (list endpoint may omit it)
+      const full = p.id != null ? await fetchProjectByIdFromApi(p.id) : null;
+      const source = full ?? p;
       const project: Project = {
-        id: p.id,
-        title: p.title,
-        slug: p.slug,
-        gif: p.gif,
-        description: p.description ?? "",
-        images: p.images ?? [],
+        id: source.id,
+        title: source.title,
+        slug: source.slug,
+        gif: source.gif,
+        description: source.description ?? "",
+        images: source.images ?? [],
       };
       return { project, section };
     }
