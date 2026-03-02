@@ -1,0 +1,231 @@
+.mainImage {
+  width: 100%;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  margin-bottom: 2rem;
+  cursor: zoom-in;
+  display: block;
+  background: var(--color-card);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .mainImage {
+    margin-bottom: 3rem;
+    border-radius: 1rem;
+  }
+}
+
+.mainImage:hover {
+  border-color: var(--color-text);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+.mainImageImg {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.mainImage:hover .mainImageImg {
+  transform: scale(1.02);
+}
+
+.mainImageOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0);
+  opacity: 0;
+  transition: all 0.3s ease;
+  color: white;
+}
+
+.mainImage:hover .mainImageOverlay {
+  background: rgba(0, 0, 0, 0.3);
+  opacity: 1;
+}
+
+/* Image Grid */
+.imageGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (min-width: 480px) {
+  .imageGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .imageGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .imageGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+  }
+}
+
+/* Image Card */
+.imageCard {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  cursor: zoom-in;
+  display: block;
+  background: var(--color-card);
+  position: relative;
+  aspect-ratio: 1;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+@media (min-width: 768px) {
+  .imageCard {
+    border-radius: 1rem;
+  }
+}
+
+.imageCard:hover {
+  border-color: var(--color-text);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.imageCardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.imageCard:hover .imageCardImg {
+  transform: scale(1.05);
+}
+
+.imageCardOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0);
+  opacity: 0;
+  transition: all 0.3s ease;
+  color: white;
+}
+
+.imageCard:hover .imageCardOverlay {
+  background: rgba(0, 0, 0, 0.3);
+  opacity: 1;
+}
+
+/* Preview Modal */
+.previewModal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.95);
+  padding: 1rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.closeButton {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 51;
+}
+
+@media (min-width: 640px) {
+  .closeButton {
+    top: 2rem;
+    right: 2rem;
+  }
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.previewImage {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  animation: zoomIn 0.3s ease-out;
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .mainImage {
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .imageCard {
+    border-radius: 0.5rem;
+  }
+
+  .closeButton {
+    width: 2.5rem;
+    height: 2.5rem;
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+
+  .previewImage {
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+}

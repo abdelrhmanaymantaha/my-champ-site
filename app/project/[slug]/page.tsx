@@ -2,6 +2,7 @@ import { getProjectBySlug } from "@/lib/content";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import ProjectGallery from "@/components/ProjectGallery";
+import styles from "./project.module.css";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -14,48 +15,82 @@ export async function generateMetadata({ params }: Props) {
   return { title: `${result.project.title} | Champ Studio` };
 }
 
+const projectTypeColors: Record<string, string> = {
+  direction: "#FF6B35",
+  design: "#004E89",
+  motion: "#F77F00",
+  branding: "#06A77D",
+};
+
+const projectTypeLabels: Record<string, string> = {
+  direction: "DIRECTION",
+  design: "DESIGN",
+  motion: "MOTION",
+  branding: "BRANDING",
+};
+
 export default async function ProjectPage({ params }: Props) {
   const { slug } = await params;
   const result = await getProjectBySlug(slug);
   if (!result) notFound();
 
   const { project } = result;
+  const projectType = project.project_type || "branding";
+  const typeColor = projectTypeColors[projectType];
+  const typeLabel = projectTypeLabels[projectType];
 
   const additionalImages = project.images || [];
 
   return (
-    <div className="min-h-screen px-10 py-24 max-w-4xl mx-auto">
-      <Link
-        href="/#projects"
-        className="inline-block text-sm opacity-70 hover:opacity-100 mb-12"
-      >
-        ← Back to projects
+    <div className={styles.container}>
+      <Link href="/#projects" className={styles.backLink}>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path
+            d="M15 10H5M5 10L10 15M5 10L10 5"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        Back to projects
       </Link>
 
-      <h1 className="text-4xl md:text-6xl font-bold mb-2">{project.title}</h1>
-      {project.slug && (
-        <p className="text-sm opacity-70 mb-8 uppercase tracking-wide">
-          {project.slug.replace(/-/g, ", ")}
-        </p>
-      )}
+      <div className={styles.header}>
+        <div className={styles.titleSection}>
+          <h1 className={styles.title}>{project.title}</h1>
+          <div
+            className={styles.projectTypeBadge}
+            style={{ borderColor: typeColor, color: typeColor }}
+          >
+            {typeLabel}
+          </div>
+        </div>
+      </div>
 
       {project.description && (
-        <p className="text-lg opacity-90 mb-16 leading-relaxed whitespace-pre-line">
-          {project.description}
-        </p>
+        <p className={styles.description}>{project.description}</p>
       )}
 
-      <ProjectGallery
-        title={project.title}
-        mainImage={project.gif}
-        images={additionalImages}
-      />
+      <div className={styles.gallerySection}>
+        <ProjectGallery
+          title={project.title}
+          mainImage={project.gif}
+          images={additionalImages}
+        />
+      </div>
 
-      <Link
-        href="/#projects"
-        className="inline-block mt-16 text-sm opacity-70 hover:opacity-100"
-      >
-        ← Back to projects
+      <Link href="/#projects" className={styles.backLink}>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path
+            d="M15 10H5M5 10L10 15M5 10L10 5"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        Back to projects
       </Link>
     </div>
   );

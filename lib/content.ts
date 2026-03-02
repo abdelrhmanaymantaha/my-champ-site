@@ -20,6 +20,7 @@ export type Project = {
   gif: string;
   description?: string;
   images?: string[];
+  project_type?: "branding" | "motion" | "direction" | "design";
 };
 
 export type ProjectsContent = {
@@ -215,6 +216,7 @@ export async function getContentWithProjects(): Promise<Content> {
         gif: p.gif,
         description: p.description ?? "",
         images: p.images ?? [],
+        project_type: p.project_type ?? "branding",
       };
       if (p.project_type === "motion") motion.push(project);
       else branding.push(project);

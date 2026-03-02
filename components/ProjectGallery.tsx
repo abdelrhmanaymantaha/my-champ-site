@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import styles from "./ProjectGallery.module.css";
 
 type Props = {
   title: string;
@@ -17,32 +18,68 @@ export default function ProjectGallery({ title, mainImage, images }: Props) {
       <button
         type="button"
         onClick={() => setPreviewSrc(mainImage)}
-        className="w-full rounded-lg overflow-hidden border border-[var(--color-border)] mb-12 cursor-zoom-in block text-left"
-        style={{ background: "var(--color-card)" }}
+        className={styles.mainImage}
+        aria-label={`View ${title} full size`}
       >
         <img
           src={mainImage}
           alt={title}
-          className="w-full h-auto object-contain"
+          loading="lazy"
+          className={styles.mainImageImg}
         />
+        <div className={styles.mainImageOverlay}>
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <circle
+              cx="16"
+              cy="16"
+              r="15"
+              stroke="currentColor"
+              strokeWidth="2"
+            />
+            <path
+              d="M16 12V20M12 16H20"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+        </div>
       </button>
 
       {/* Additional images grid */}
       {images.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className={styles.imageGrid}>
           {images.map((src, i) => (
             <button
               key={i}
               type="button"
               onClick={() => setPreviewSrc(src)}
-              className="rounded-lg overflow-hidden border border-[var(--color-border)] aspect-square cursor-zoom-in block text-left"
-              style={{ background: "var(--color-card)" }}
+              className={styles.imageCard}
+              aria-label={`View image ${i + 1} of ${title}`}
             >
               <img
                 src={src}
                 alt={`${title} - ${i + 1}`}
-                className="w-full h-full object-cover"
+                loading="lazy"
+                className={styles.imageCardImg}
               />
+              <div className={styles.imageCardOverlay}>
+                <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+                  <circle
+                    cx="16"
+                    cy="16"
+                    r="15"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                  <path
+                    d="M16 12V20M12 16H20"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
             </button>
           ))}
         </div>
@@ -51,21 +88,30 @@ export default function ProjectGallery({ title, mainImage, images }: Props) {
       {/* Preview modal */}
       {previewSrc && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          className={styles.previewModal}
           onClick={() => setPreviewSrc(null)}
+          role="dialog"
+          aria-modal="true"
         >
           <button
             type="button"
             onClick={() => setPreviewSrc(null)}
-            className="absolute top-4 right-4 text-white/80 hover:text-white text-2xl"
-            aria-label="Close"
+            className={styles.closeButton}
+            aria-label="Close preview"
           >
-            ×
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <path
+                d="M8 8L24 24M24 8L8 24"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+            </svg>
           </button>
           <img
             src={previewSrc}
             alt={title}
-            className="max-w-full max-h-[90vh] object-contain"
+            className={styles.previewImage}
             onClick={(e) => e.stopPropagation()}
           />
         </div>
