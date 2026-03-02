@@ -3,6 +3,7 @@ import Section from "@/components/Section";
 import Projects from "@/components/Projects";
 import Play from "@/components/Play";
 import About from "@/components/AboutSection";
+import SocialMedia from "@/components/SocialMedia";
 import { getContentWithProjects } from "@/lib/content";
 
 export default async function Home() {
@@ -19,6 +20,7 @@ export default async function Home() {
       <Section id="play" title={content.sections.play}>
         <Play content={content.play} />
       </Section>
+      <SocialMedia socialMedia={content.socialMedia} />
     </>
   );
   

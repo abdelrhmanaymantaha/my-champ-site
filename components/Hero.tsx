@@ -47,18 +47,18 @@ export default function Hero({ content }: { content: HeroContent }) {
   return (
     <section
       id="home"
-      className="min-h-screen px-10 pt-0"
+      className="min-h-screen px-4 sm:px-6 md:px-10 pt-0"
       style={{ background: "var(--color-bg)" }}
     >
       <motion.h1
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
-        className="relative text-[30vw] font-extrabold lowercase leading-none tracking-tight"
+        className="relative text-[20vw] sm:text-[25vw] md:text-[30vw] font-extrabold lowercase leading-none tracking-tight"
       >
         {content.title}
         <motion.div
-          className="absolute left-[12%] bottom-[6%] w-[6vw]"
+          className="absolute left-[12%] bottom-[6%] w-[8vw] sm:w-[7vw] md:w-[6vw]"
           initial={{ y: 40, opacity: 0 }}
           animate={{
             y: [40, 0, 0, 40],
@@ -78,7 +78,7 @@ export default function Hero({ content }: { content: HeroContent }) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 0.7, y: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
-        className="text-3xl opacity-70 mb-10 mt-6"
+        className="text-xl sm:text-2xl md:text-3xl opacity-70 mb-6 sm:mb-8 md:mb-10 mt-4 sm:mt-5 md:mt-6"
       >
         {content.tagline}
       </motion.p>
@@ -87,15 +87,15 @@ export default function Hero({ content }: { content: HeroContent }) {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
+        className="max-w-full"
       >
         <motion.p
           variants={itemVariants}
-          className="w-full max-w-none text-6xl font-bold mt-19 opacity-80"
+          className="w-full max-w-none text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mt-8 sm:mt-12 md:mt-16 lg:mt-19 opacity-80 leading-relaxed"
         >
           {content.bulletPoints.map((line, i) => (
-            <span key={i}>
+            <span key={i} className="block mb-4 sm:mb-6">
               {line}
-              {i < content.bulletPoints.length - 1 && <br />}
             </span>
           ))}
         </motion.p>

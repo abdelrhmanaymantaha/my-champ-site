@@ -48,6 +48,13 @@ type SectionsContent = {
   play: string;
 };
 
+type SocialMedia = {
+  linkedin?: string;
+  behance?: string;
+  facebook?: string;
+  instagram?: string;
+};
+
 type Content = {
   hero: HeroContent;
   about: AboutContent;
@@ -55,6 +62,7 @@ type Content = {
   play: PlayContent;
   navbar: NavbarContent;
   sections: SectionsContent;
+  socialMedia: SocialMedia;
 };
 
 export default function AdminDashboardPage() {
@@ -128,6 +136,12 @@ export default function AdminDashboardPage() {
     e.preventDefault();
     if (!content) return;
     save({ sections: content.sections });
+  };
+
+  const saveSocialMedia = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!content) return;
+    save({ socialMedia: content.socialMedia });
   };
 
   const slugify = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -559,6 +573,60 @@ export default function AdminDashboardPage() {
             className="px-6 py-2 bg-[var(--color-text)] text-[var(--color-bg)] rounded font-medium disabled:opacity-50"
           >
             Save Section Titles
+          </button>
+        </form>
+      </section>
+
+      {/* Social Media */}
+      <section className="mb-16">
+        <h2 className="text-xl font-semibold mb-6">Social Media Links</h2>
+        <form onSubmit={saveSocialMedia} className="space-y-4">
+          <div>
+            <label className="block text-sm mb-1">LinkedIn URL</label>
+            <input
+              type="url"
+              value={content.socialMedia?.linkedin || ""}
+              onChange={(e) => setContent({ ...content, socialMedia: { ...content.socialMedia, linkedin: e.target.value } })}
+              placeholder="https://www.linkedin.com/in/yourprofile"
+              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
+            />
+          </div>
+          <div>
+            <label className="block text-sm mb-1">Behance URL</label>
+            <input
+              type="url"
+              value={content.socialMedia?.behance || ""}
+              onChange={(e) => setContent({ ...content, socialMedia: { ...content.socialMedia, behance: e.target.value } })}
+              placeholder="https://www.behance.net/yourprofile"
+              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
+            />
+          </div>
+          <div>
+            <label className="block text-sm mb-1">Facebook URL</label>
+            <input
+              type="url"
+              value={content.socialMedia?.facebook || ""}
+              onChange={(e) => setContent({ ...content, socialMedia: { ...content.socialMedia, facebook: e.target.value } })}
+              placeholder="https://www.facebook.com/yourprofile"
+              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
+            />
+          </div>
+          <div>
+            <label className="block text-sm mb-1">Instagram URL</label>
+            <input
+              type="url"
+              value={content.socialMedia?.instagram || ""}
+              onChange={(e) => setContent({ ...content, socialMedia: { ...content.socialMedia, instagram: e.target.value } })}
+              placeholder="https://www.instagram.com/yourprofile"
+              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={saving}
+            className="px-6 py-2 bg-[var(--color-text)] text-[var(--color-bg)] rounded font-medium disabled:opacity-50"
+          >
+            Save Social Media
           </button>
         </form>
       </section>

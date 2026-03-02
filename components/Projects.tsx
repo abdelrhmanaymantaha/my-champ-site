@@ -14,9 +14,9 @@ type ProjectsContent = {
 
 function ProjectGrid({ projects, title }: { projects: Project[]; title: string }) {
   return (
-    <div className="mb-20">
-      <h3 className="text-3xl font-bold mb-8">{title}</h3>
-      <div className="grid md:grid-cols-3 gap-8 pt-8">
+    <div className="mb-12 sm:mb-16 md:mb-20">
+      <h3 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">{title}</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 pt-4 sm:pt-6 md:pt-8">
         {projects.map((project, i) => (
           <Link
             key={i}
@@ -24,7 +24,7 @@ function ProjectGrid({ projects, title }: { projects: Project[]; title: string }
             className="flex flex-col items-center group cursor-pointer"
           >
             <div
-              className="h-64 w-full border rounded-lg overflow-hidden mt-10 shadow-lg transition group-hover:opacity-90"
+              className="h-48 sm:h-56 md:h-64 w-full border rounded-lg overflow-hidden mt-4 sm:mt-6 md:mt-10 shadow-lg transition group-hover:opacity-90 group-hover:shadow-xl"
               style={{
                 background: "var(--color-card)",
                 borderColor: "var(--color-border)",
@@ -36,7 +36,7 @@ function ProjectGrid({ projects, title }: { projects: Project[]; title: string }
                 className="w-full h-full object-cover"
               />
             </div>
-            <h4 className="mt-4 text-xl font-semibold text-center group-hover:opacity-80 transition">
+            <h4 className="mt-3 sm:mt-4 text-lg sm:text-xl font-semibold text-center group-hover:opacity-80 transition px-2">
               {project.title}
             </h4>
           </Link>
@@ -48,7 +48,7 @@ function ProjectGrid({ projects, title }: { projects: Project[]; title: string }
 
 export default function Projects({ projects }: { projects: ProjectsContent }) {
   return (
-    <div className="pt-32">
+    <div className="pt-16 sm:pt-24 md:pt-32">
       <ProjectGrid projects={projects.branding} title="Branding" />
       <ProjectGrid projects={projects.motion} title="Motion" />
     </div>

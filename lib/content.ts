@@ -48,6 +48,13 @@ export type SectionsContent = {
   play: string;
 };
 
+export type SocialMedia = {
+  linkedin?: string;
+  behance?: string;
+  facebook?: string;
+  instagram?: string;
+};
+
 export type Content = {
   hero: HeroContent;
   about: AboutContent;
@@ -55,6 +62,7 @@ export type Content = {
   play: PlayContent;
   navbar: NavbarContent;
   sections: SectionsContent;
+  socialMedia: SocialMedia;
 };
 
 const defaultContent: Content = {
@@ -94,6 +102,12 @@ const defaultContent: Content = {
     about: "About",
     projects: "Projects",
     play: "Play",
+  },
+  socialMedia: {
+    linkedin: "",
+    behance: "",
+    facebook: "",
+    instagram: "",
   },
 };
 
@@ -178,6 +192,7 @@ export function getContent(): Content {
       play: { ...defaultContent.play, ...parsed.play },
       navbar: { ...defaultContent.navbar, ...parsed.navbar },
       sections: { ...defaultContent.sections, ...parsed.sections },
+      socialMedia: { ...defaultContent.socialMedia, ...parsed.socialMedia },
     };
   } catch {
     return defaultContent;

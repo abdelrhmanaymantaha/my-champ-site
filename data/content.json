@@ -31,5 +31,11 @@
     "about": "About",
     "projects": "Projects",
     "play": "Play"
+  },
+  "socialMedia": {
+    "linkedin": "https://www.linkedin.com/in/yourprofile",
+    "behance": "https://www.behance.net/yourprofile",
+    "facebook": "https://www.facebook.com/yourprofile",
+    "instagram": "https://www.instagram.com/yourprofile"
   }
 }

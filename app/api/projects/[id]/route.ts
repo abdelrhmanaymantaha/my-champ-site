@@ -6,20 +6,28 @@ function getBaseUrl(): string {
   return url.replace(/\/$/, "");
 }
 
+function getPublicUrl(): string {
+  // Use public URL for displaying images, fallback to private URL if not set
+  const publicUrl = process.env.PROJECTS_PUBLIC_URL || process.env.PROJECTS_API_BASE_URL;
+  if (!publicUrl) throw new Error("PROJECTS_PUBLIC_URL or PROJECTS_API_BASE_URL is not set");
+  return publicUrl.replace(/\/$/, "");
+}
+
 type RouteParams = { params: Promise<{ id: string }> };
 
 export async function GET(_request: Request, { params }: RouteParams) {
   const { id } = await params;
   try {
     const base = getBaseUrl();
+    const publicBase = getPublicUrl();
     const res = await fetch(`${base}/api/projects/${id}`);
     const data = await res.json();
     if (!res.ok) return NextResponse.json(data, { status: res.status });
     const p = data as { gif?: string; images?: string[] };
     const rewritten = {
       ...data,
-      gif: p.gif?.startsWith("http") ? p.gif : `${base}${p.gif?.startsWith("/") ? "" : "/"}${p.gif ?? ""}`,
-      images: (p.images ?? []).map((s: string) => (s.startsWith("http") ? s : `${base}${s.startsWith("/") ? "" : "/"}${s}`)),
+      gif: p.gif?.startsWith("http") ? p.gif.replace(base, publicBase) : `${publicBase}${p.gif?.startsWith("/") ? "" : "/"}${p.gif ?? ""}`,
+      images: (p.images ?? []).map((s: string) => (s.startsWith("http") ? s.replace(base, publicBase) : `${publicBase}${s.startsWith("/") ? "" : "/"}${s}`)),
     };
     return NextResponse.json(rewritten);
   } catch (e) {

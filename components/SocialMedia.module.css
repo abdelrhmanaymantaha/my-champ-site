@@ -1,0 +1,132 @@
+.container {
+  background: var(--color-bg);
+  color: var(--color-text);
+  padding: 100px 8%;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 40px;
+}
+
+.title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: clamp(1rem, 1.5vw, 1.3rem);
+  opacity: 0.6;
+  margin: 0;
+}
+
+.linksContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.socialLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  padding: 30px 25px;
+  background: var(--color-card, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+  border-radius: 16px;
+  color: var(--color-text);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  min-width: 140px;
+}
+
+.socialLink:hover {
+  transform: translateY(-8px);
+  background: var(--color-card-hover, rgba(255, 255, 255, 0.08));
+  border-color: var(--color-text);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.socialLink:hover .icon {
+  transform: scale(1.1);
+}
+
+.linkName {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 80px 6%;
+  }
+
+  .linksContainer {
+    gap: 20px;
+  }
+
+  .socialLink {
+    padding: 25px 20px;
+    min-width: 120px;
+  }
+
+  .icon {
+    width: 35px;
+    height: 35px;
+  }
+
+  .linkName {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 60px 5%;
+  }
+
+  .content {
+    gap: 30px;
+  }
+
+  .linksContainer {
+    gap: 15px;
+    width: 100%;
+  }
+
+  .socialLink {
+    flex: 1 1 calc(50% - 10px);
+    min-width: auto;
+    padding: 20px 15px;
+  }
+
+  .icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .linkName {
+    font-size: 0.85rem;
+  }
+}

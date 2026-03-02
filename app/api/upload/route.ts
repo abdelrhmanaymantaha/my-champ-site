@@ -6,18 +6,28 @@ function getBaseUrl(): string {
   return url.replace(/\/$/, "");
 }
 
+function getPublicUrl(): string {
+  // Use public URL for displaying images, fallback to private URL if not set
+  const publicUrl = process.env.PROJECTS_PUBLIC_URL || process.env.PROJECTS_API_BASE_URL;
+  if (!publicUrl) throw new Error("PROJECTS_PUBLIC_URL or PROJECTS_API_BASE_URL is not set");
+  return publicUrl.replace(/\/$/, "");
+}
+
 export async function POST(request: Request) {
   let base: string;
+  let publicBase: string;
   try {
     base = getBaseUrl();
+    publicBase = getPublicUrl();
   } catch {
     return NextResponse.json(
-      { error: "Upload not configured. Set PROJECTS_API_BASE_URL in .env.local." },
+      { error: "Upload not configured. Set PROJECTS_API_BASE_URL and PROJECTS_PUBLIC_URL in .env.local." },
       { status: 503 }
     );
   }
   try {
     const formData = await request.formData();
+    // Upload to private API URL
     const res = await fetch(`${base}/api/upload`, {
       method: "POST",
       body: formData,
@@ -25,7 +35,14 @@ export async function POST(request: Request) {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) return NextResponse.json(data, { status: res.status });
     const urls = (data.urls as string[]) ?? [];
-    const rewritten = urls.map((u: string) => (u.startsWith("http") ? u : `${base}${u.startsWith("/") ? "" : "/"}${u}`));
+    // Rewrite URLs to use public URL for displaying
+    const rewritten = urls.map((u: string) => {
+      if (u.startsWith("http")) {
+        // Replace private URL with public URL if present
+        return u.replace(base, publicBase);
+      }
+      return `${publicBase}${u.startsWith("/") ? "" : "/"}${u}`;
+    });
     return NextResponse.json({ urls: rewritten });
   } catch (e) {
     console.error("Upload API error:", e);

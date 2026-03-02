@@ -1,6 +1,22 @@
-.projects{
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    margin-top: 200px;
+.projects {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-top: 120px;
+  padding: 0 2%;
+}
+
+@media (max-width: 768px) {
+  .projects {
+    margin-top: 60px;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .projects {
+    margin-top: 40px;
+    gap: 1rem;
+    padding: 0;
+  }
 }

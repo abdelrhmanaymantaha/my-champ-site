@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-
 import styles from "./about.module.css";
 
 type AboutContent = {
@@ -21,44 +20,53 @@ export default function About({ content }: { content: AboutContent }) {
   return (
     <main className={styles.container}>
       <section className={styles.hero}>
-        <h1 className={styles.title}>
-          {firstWord}
-          {rest && (
-            <>
-              <br /> {rest}{" "}
-            </>
-          )}
-          <span className={styles.dash}>{content.subtitle}</span>
-        </h1>
+        <div className={styles.titleSection}>
+          <h1 className={styles.title}>
+            {firstWord}
+            {rest && (
+              <>
+                <br /> {rest}{" "}
+              </>
+            )}
+          </h1>
+          <span className={styles.subtitle}>{content.subtitle}</span>
+        </div>
 
         <div className={styles.imageWrapper}>
-          <Image
-            src="/me.jpg"
-            alt="Your Name"
-            width={500}
-            height={600}
-            className={styles.image}
-          />
+          <div className={styles.imageFrame}>
+            <Image
+              src="/me.jpg"
+              alt="Profile"
+              width={500}
+              height={600}
+              className={styles.image}
+              priority
+            />
+          </div>
         </div>
       </section>
 
       <section className={styles.aboutText}>
-        (about)
-        <p className="w-full max-w-none text-6xl font-bold mt-19 opacity-80 whitespace-pre-line">
+        <span className={styles.label}>(about)</span>
+        <p className={styles.mainText}>
           {content.mainText}
         </p>
       </section>
 
-      <p className={styles.description}>{content.description}</p>
+      <div className={styles.descriptionSection}>
+        <p className={styles.description}>{content.description}</p>
+      </div>
 
       <section className={styles.quoteSection}>
-        <blockquote>{content.quote}</blockquote>
-        <span className={styles.quoteLine}></span>
+        <div className={styles.quoteContainer}>
+          <blockquote className={styles.quote}>{content.quote}</blockquote>
+          <span className={styles.quoteLine}></span>
+        </div>
       </section>
 
       <section className={styles.bottom}>
-        <h2 className="whitespace-pre-line">{content.bottomTitle}</h2>
-        <p>{content.bottomText}</p>
+        <h2 className={styles.bottomTitle}>{content.bottomTitle}</h2>
+        <p className={styles.bottomText}>{content.bottomText}</p>
       </section>
     </main>
   );
