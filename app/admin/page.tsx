@@ -130,9 +130,86 @@ export default function AdminDashboardPage() {
 
   const slugify = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
+  const compressImage = (file: File): Promise<File> => {
+    // Only compress regular images; keep GIFs as-is to avoid breaking animation
+    if (!file.type.startsWith("image/") || file.type === "image/gif") {
+      return Promise.resolve(file);
+    }
+    return new Promise((resolve) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        if (!e.target?.result) {
+          resolve(file);
+          return;
+        }
+        img.src = e.target.result as string;
+      };
+
+      reader.onerror = () => resolve(file);
+
+      img.onload = () => {
+        const maxSize = 1600; // max width/height
+        let { width, height } = img;
+        if (width > maxSize || height > maxSize) {
+          const scale = Math.min(maxSize / width, maxSize / height);
+          width = Math.round(width * scale);
+          height = Math.round(height * scale);
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(file);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const quality = 0.72;
+
+        // Prefer AVIF (smaller) if supported; fall back to WebP.
+        canvas.toBlob(
+          (avifBlob) => {
+            if (avifBlob) {
+              const optimized = new File([avifBlob], file.name.replace(/\.[^.]+$/, ".avif"), {
+                type: "image/avif",
+              });
+              resolve(optimized);
+              return;
+            }
+            canvas.toBlob(
+              (webpBlob) => {
+                if (!webpBlob) {
+                  resolve(file);
+                  return;
+                }
+                const optimized = new File([webpBlob], file.name.replace(/\.[^.]+$/, ".webp"), {
+                  type: "image/webp",
+                });
+                resolve(optimized);
+              },
+              "image/webp",
+              0.8
+            );
+          },
+          "image/avif",
+          quality
+        );
+      };
+
+      img.onerror = () => resolve(file);
+
+      reader.readAsDataURL(file);
+    });
+  };
+
   const uploadOneImage = async (file: File, setUploading: (v: boolean) => void): Promise<string | null> => {
+    const optimized = await compressImage(file);
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", optimized);
     setUploading(true);
     setMessage(null);
     try {
@@ -169,7 +246,10 @@ export default function AdminDashboardPage() {
     setMessage(null);
     try {
       const formData = new FormData();
-      fileArray.forEach((file) => formData.append("files", file));
+      for (const file of fileArray) {
+        const optimized = await compressImage(file);
+        formData.append("files", optimized);
+      }
       const res = await fetch("/api/upload", { method: "POST", body: formData });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
