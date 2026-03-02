@@ -739,6 +739,7 @@ export default function AdminDashboardPage() {
                       const file = e.target.files?.[0];
                       if (!file) return;
                       const url = await uploadCoverImage(file);
+                      console.log("Uploaded cover image URL:", url);
                       if (url) setNewProject((prev) => ({ ...prev, gif: url }));
                       e.target.value = "";
                     }}
@@ -763,9 +764,18 @@ export default function AdminDashboardPage() {
               {(newProject.images?.length ?? 0) > 0 && (
                 <ul className="flex flex-wrap gap-3 list-none p-0 m-0">
                   {(newProject.images ?? []).map((url, idx) => (
-                    <li key={`${url}-${idx}`} className="relative group">
+                    <li key={idx} className="relative group">
                       <div className="w-20 h-20 rounded-lg overflow-hidden border border-[var(--color-border)] bg-[var(--color-card)]">
-                        <img src={url} alt="" className="w-full h-full object-cover" />
+                        <img 
+                          src={url} 
+                          alt="" 
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            console.error("Failed to load image:", url);
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-xs text-red-500">Failed</div>';
+                          }}
+                        />
                       </div>
                       <button
                         type="button"
@@ -817,6 +827,7 @@ export default function AdminDashboardPage() {
                       const files = e.target.files;
                       if (!files?.length) return;
                       const urls = await uploadMultipleImages(files);
+                      console.log("Uploaded image URLs:", urls);
                       if (urls.length) setNewProject((prev) => ({ ...prev, images: [...(prev.images ?? []), ...urls] }));
                       e.target.value = "";
                     }}
@@ -927,9 +938,18 @@ export default function AdminDashboardPage() {
                         {(editProjectDraft.images?.length ?? 0) > 0 && (
                           <ul className="flex flex-wrap gap-3 list-none p-0 m-0 mb-2">
                             {(editProjectDraft.images ?? []).map((url, idx) => (
-                              <li key={`${url}-${idx}`} className="relative group">
+                              <li key={idx} className="relative group">
                                 <div className="w-20 h-20 rounded-lg overflow-hidden border border-[var(--color-border)] bg-[var(--color-card)]">
-                                  <img src={url} alt="" className="w-full h-full object-cover" />
+                                  <img 
+                                    src={url} 
+                                    alt="" 
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                      console.error("Failed to load image:", url);
+                                      e.currentTarget.style.display = 'none';
+                                      e.currentTarget.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-xs text-red-500">Failed</div>';
+                                    }}
+                                  />
                                 </div>
                                 <button
                                   type="button"
