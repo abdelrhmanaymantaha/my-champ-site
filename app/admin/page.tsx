@@ -67,6 +67,8 @@ export default function AdminDashboardPage() {
   const [editProjectDraft, setEditProjectDraft] = useState<Project | null>(null);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [coverProgress, setCoverProgress] = useState(0);
+  const [imageProgressMap, setImageProgressMap] = useState<Record<string, number>>({});
 
   useEffect(() => {
     fetch("/api/admin/content")
@@ -130,140 +132,121 @@ export default function AdminDashboardPage() {
 
   const slugify = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
-  const compressImage = (file: File): Promise<File> => {
-    // Only compress regular images; keep GIFs as-is to avoid breaking animation
-    if (!file.type.startsWith("image/") || file.type === "image/gif") {
-      return Promise.resolve(file);
-    }
-    return new Promise((resolve) => {
-      const img = new Image();
-      const reader = new FileReader();
-
-      reader.onload = (e) => {
-        if (!e.target?.result) {
-          resolve(file);
-          return;
-        }
-        img.src = e.target.result as string;
-      };
-
-      reader.onerror = () => resolve(file);
-
-      img.onload = () => {
-        const maxSize = 1600; // max width/height
-        let { width, height } = img;
-        if (width > maxSize || height > maxSize) {
-          const scale = Math.min(maxSize / width, maxSize / height);
-          width = Math.round(width * scale);
-          height = Math.round(height * scale);
-        }
-
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          resolve(file);
-          return;
-        }
-        ctx.drawImage(img, 0, 0, width, height);
-
-        const quality = 0.72;
-
-        // Prefer AVIF (smaller) if supported; fall back to WebP.
-        canvas.toBlob(
-          (avifBlob) => {
-            if (avifBlob) {
-              const optimized = new File([avifBlob], file.name.replace(/\.[^.]+$/, ".avif"), {
-                type: "image/avif",
-              });
-              resolve(optimized);
-              return;
-            }
-            canvas.toBlob(
-              (webpBlob) => {
-                if (!webpBlob) {
-                  resolve(file);
-                  return;
-                }
-                const optimized = new File([webpBlob], file.name.replace(/\.[^.]+$/, ".webp"), {
-                  type: "image/webp",
-                });
-                resolve(optimized);
-              },
-              "image/webp",
-              0.8
-            );
-          },
-          "image/avif",
-          quality
-        );
-      };
-
-      img.onerror = () => resolve(file);
-
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const uploadOneImage = async (file: File, setUploading: (v: boolean) => void): Promise<string | null> => {
-    const optimized = await compressImage(file);
+  const uploadOneImage = async (setUploading: (v: boolean) => void, setProgress?: (pct: number) => void, file?: File): Promise<string | null> => {
+    if (!file) return null;
     const formData = new FormData();
-    formData.append("file", optimized);
+    formData.append("file", file);
     setUploading(true);
     setMessage(null);
     try {
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        const err = data.error ?? data.detail ?? "Upload failed";
-        setMessage({ type: "error", text: typeof err === "string" ? err : JSON.stringify(err) });
-        return null;
-      }
-      const urls = data.urls as string[] | undefined;
-      const url = urls?.[0];
-      if (url) return url;
-      setMessage({ type: "error", text: "No URL returned from upload" });
-      return null;
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/api/upload");
+      xhr.responseType = "text";
+
+      xhr.upload.onprogress = (event) => {
+        if (setProgress && event.lengthComputable && event.total > 0) {
+          // Cap at 90% during upload, leave 10% for server processing
+          const pct = Math.max(0, Math.min(90, Math.round((event.loaded / event.total) * 90)));
+          setProgress(pct);
+        }
+      };
+
+      return new Promise((resolve) => {
+        xhr.onload = () => {
+          try {
+            // Set progress to 100% once response is received
+            if (setProgress) setProgress(100);
+            
+            const text = xhr.responseText || "{}";
+            const data = JSON.parse(text) as { urls?: string[]; error?: unknown; detail?: unknown };
+            if (xhr.status >= 200 && xhr.status < 300) {
+              const urls = data.urls as string[] | undefined;
+              const url = urls?.[0];
+              if (url) {
+                resolve(url);
+                return;
+              }
+              setMessage({ type: "error", text: "No URL returned from upload" });
+            } else {
+              const err = data.error ?? data.detail ?? `Upload failed (${xhr.status})`;
+              setMessage({ type: "error", text: typeof err === "string" ? err : JSON.stringify(err) });
+            }
+            resolve(null);
+          } catch {
+            setMessage({ type: "error", text: "Invalid response from upload" });
+            resolve(null);
+          } finally {
+            setUploading(false);
+            // Small delay before clearing progress
+            setTimeout(() => {
+              if (setProgress) setProgress(0);
+            }, 500);
+          }
+        };
+
+        xhr.onerror = () => {
+          setMessage({ type: "error", text: "Network error during upload" });
+          setUploading(false);
+          if (setProgress) setProgress(0);
+          resolve(null);
+        };
+
+        xhr.send(formData);
+      });
     } catch {
       setMessage({ type: "error", text: "Failed to upload image" });
-      return null;
-    } finally {
       setUploading(false);
+      if (setProgress) setProgress(0);
+      return null;
     }
   };
 
-  const uploadCoverImage = (file: File) => uploadOneImage(file, setUploadingCover);
+  const uploadCoverImage = (file: File) => uploadOneImage(setUploadingCover, setCoverProgress, file);
 
   const uploadMultipleImages = async (files: FileList | File[]): Promise<string[]> => {
     const fileArray = Array.from(files);
     if (fileArray.length === 0) return [];
-    if (fileArray.length === 1) {
-      const url = await uploadOneImage(fileArray[0], setUploadingImages);
-      return url ? [url] : [];
-    }
+    
     setUploadingImages(true);
     setMessage(null);
+    
+    // Initialize progress map
+    const initMap: Record<string, number> = {};
+    fileArray.forEach((_, idx) => {
+      initMap[`file-${idx}`] = 0;
+    });
+    setImageProgressMap(initMap);
+
     try {
-      const formData = new FormData();
-      for (const file of fileArray) {
-        const optimized = await compressImage(file);
-        formData.append("files", optimized);
+      // Upload with concurrency limit of 3 files at a time
+      const concurrencyLimit = 3;
+      const results: (string | null)[] = new Array(fileArray.length).fill(null);
+      
+      const uploadFile = async (idx: number) => {
+        const file = fileArray[idx];
+        const key = `file-${idx}`;
+        const url = await uploadOneImage(setUploadingImages, (pct) => {
+          setImageProgressMap((prev) => ({ ...prev, [key]: pct }));
+        }, file);
+        results[idx] = url;
+      };
+
+      // Create upload tasks
+      const uploadTasks = fileArray.map((_, idx) => uploadFile(idx));
+      
+      // Execute with concurrency limit
+      for (let i = 0; i < uploadTasks.length; i += concurrencyLimit) {
+        const batch = uploadTasks.slice(i, i + concurrencyLimit);
+        await Promise.all(batch);
       }
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        const err = data.error ?? data.detail ?? "Upload failed";
-        setMessage({ type: "error", text: typeof err === "string" ? err : JSON.stringify(err) });
-        return [];
-      }
-      const urls = (data.urls as string[]) ?? [];
-      return urls;
+
+      return results.filter((url) => url !== null) as string[];
     } catch {
       setMessage({ type: "error", text: "Failed to upload images" });
       return [];
     } finally {
       setUploadingImages(false);
+      setImageProgressMap({});
     }
   };
 
@@ -731,6 +714,20 @@ export default function AdminDashboardPage() {
                   </button>
                 </div>
               ) : null}
+              {coverProgress > 0 && coverProgress < 100 && (
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center text-xs opacity-60">
+                    <span>Uploading cover...</span>
+                    <span>{coverProgress}%</span>
+                  </div>
+                  <div className="w-32 h-2 bg-[var(--color-border)] rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-blue-500 transition-all"
+                      style={{ width: `${coverProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
               <div className="flex flex-wrap gap-2 items-center mt-2">
                 <label className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded cursor-pointer hover:opacity-90">
                   <input
@@ -786,6 +783,27 @@ export default function AdminDashboardPage() {
                     </li>
                   ))}
                 </ul>
+              )}
+              {Object.keys(imageProgressMap).length > 0 && (
+                <div className="space-y-2 mt-3">
+                  <label className="block text-xs font-medium opacity-70">Uploading...</label>
+                  <div className="space-y-2">
+                    {Object.entries(imageProgressMap).map(([key, progress]) => (
+                      <div key={key} className="space-y-1">
+                        <div className="flex justify-between items-center text-xs opacity-60">
+                          <span>{key}</span>
+                          <span>{progress}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-[var(--color-border)] rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-blue-500 transition-all"
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
               <div className="flex flex-wrap gap-2 items-center">
                 <label className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded cursor-pointer hover:opacity-90">
@@ -863,6 +881,20 @@ export default function AdminDashboardPage() {
                             </button>
                           </div>
                         ) : null}
+                        {coverProgress > 0 && coverProgress < 100 && (
+                          <div className="space-y-1 mb-2">
+                            <div className="flex justify-between items-center text-xs opacity-60">
+                              <span>Uploading cover...</span>
+                              <span>{coverProgress}%</span>
+                            </div>
+                            <div className="w-32 h-2 bg-[var(--color-border)] rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-blue-500 transition-all"
+                                style={{ width: `${coverProgress}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
                         <label className="inline-flex items-center gap-2 px-3 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded cursor-pointer hover:opacity-90 text-sm">
                           <input
                             type="file"
@@ -915,6 +947,27 @@ export default function AdminDashboardPage() {
                               </li>
                             ))}
                           </ul>
+                        )}
+                        {Object.keys(imageProgressMap).length > 0 && (
+                          <div className="space-y-2 mb-3">
+                            <label className="block text-xs font-medium opacity-70">Uploading...</label>
+                            <div className="space-y-2">
+                              {Object.entries(imageProgressMap).map(([key, progress]) => (
+                                <div key={key} className="space-y-1">
+                                  <div className="flex justify-between items-center text-xs opacity-60">
+                                    <span>{key}</span>
+                                    <span>{progress}%</span>
+                                  </div>
+                                  <div className="w-full h-2 bg-[var(--color-border)] rounded-full overflow-hidden">
+                                    <div
+                                      className="h-full bg-blue-500 transition-all"
+                                      style={{ width: `${progress}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         )}
                         <label className="inline-flex items-center gap-2 px-3 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded cursor-pointer hover:opacity-90 text-sm">
                           <input
