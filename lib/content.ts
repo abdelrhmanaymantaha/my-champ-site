@@ -208,7 +208,13 @@ export async function getContentWithProjects(): Promise<Content> {
     const apiProjects = await fetchProjectsFromApi();
     const branding: Project[] = [];
     const motion: Project[] = [];
+    const validTypes = ["branding", "motion", "direction", "design"];
     for (const p of apiProjects) {
+      const projectType = (
+        validTypes.includes(p.project_type)
+          ? p.project_type
+          : "branding"
+      ) as "branding" | "motion" | "direction" | "design";
       const project: Project = {
         id: p.id,
         title: p.title,
@@ -216,9 +222,9 @@ export async function getContentWithProjects(): Promise<Content> {
         gif: p.gif,
         description: p.description ?? "",
         images: p.images ?? [],
-        project_type: p.project_type ?? "branding",
+        project_type: projectType,
       };
-      if (p.project_type === "motion") motion.push(project);
+      if (projectType === "motion") motion.push(project);
       else branding.push(project);
     }
     content.projects = { branding, motion };
