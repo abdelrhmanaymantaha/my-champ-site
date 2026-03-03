@@ -21,7 +21,14 @@
 .mainImage:hover {
   border-color: var(--color-text);
   transform: translateY(-2px);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+:root .mainImage:hover {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme="light"] .mainImage:hover {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
 }
 
 .mainImageImg {
@@ -45,11 +52,23 @@
   background: rgba(0, 0, 0, 0);
   opacity: 0;
   transition: all 0.3s ease;
+}
+
+:root .mainImageOverlay {
   color: white;
 }
 
-.mainImage:hover .mainImageOverlay {
-  background: rgba(0, 0, 0, 0.3);
+html[data-theme="light"] .mainImageOverlay {
+  color: black;
+}
+
+:root .mainImage:hover .mainImageOverlay {
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 1;
+}
+
+html[data-theme="light"] .mainImage:hover .mainImageOverlay {
+  background: rgba(255, 255, 255, 0.6);
   opacity: 1;
 }
 
@@ -104,7 +123,14 @@
 .imageCard:hover {
   border-color: var(--color-text);
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+:root .imageCard:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme="light"] .imageCard:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .imageCardImg {
@@ -128,11 +154,23 @@
   background: rgba(0, 0, 0, 0);
   opacity: 0;
   transition: all 0.3s ease;
+}
+
+:root .imageCardOverlay {
   color: white;
 }
 
-.imageCard:hover .imageCardOverlay {
-  background: rgba(0, 0, 0, 0.3);
+html[data-theme="light"] .imageCardOverlay {
+  color: black;
+}
+
+:root .imageCard:hover .imageCardOverlay {
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 1;
+}
+
+html[data-theme="light"] .imageCard:hover .imageCardOverlay {
+  background: rgba(255, 255, 255, 0.6);
   opacity: 1;
 }
 
@@ -144,9 +182,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.95);
   padding: 1rem;
   animation: fadeIn 0.2s ease-out;
+}
+
+:root .previewModal {
+  background: rgba(0, 0, 0, 0.95);
+}
+
+html[data-theme="light"] .previewModal {
+  background: rgba(255, 255, 255, 0.95);
 }
 
 @keyframes fadeIn {
@@ -167,13 +212,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 0.5rem;
-  color: rgba(255, 255, 255, 0.8);
   cursor: pointer;
   transition: all 0.2s ease;
   z-index: 51;
+}
+
+:root .closeButton {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+html[data-theme="light"] .closeButton {
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  color: rgba(0, 0, 0, 0.8);
 }
 
 @media (min-width: 640px) {
@@ -183,9 +237,14 @@
   }
 }
 
-.closeButton:hover {
+:root .closeButton:hover {
   background: rgba(255, 255, 255, 0.2);
   color: white;
+}
+
+html[data-theme="light"] .closeButton:hover {
+  background: rgba(0, 0, 0, 0.2);
+  color: black;
 }
 
 .previewImage {
