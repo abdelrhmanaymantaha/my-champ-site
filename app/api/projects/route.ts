@@ -52,12 +52,12 @@ export async function POST(request: Request) {
       body: JSON.stringify(body),
     });
     const text = await res.text();
-    let data: object = {};
+    let data: Record<string, unknown> = {};
     if (text) {
       try {
-        data = JSON.parse(text) as object;
+        data = JSON.parse(text) as Record<string, unknown>;
       } catch {
-        data = { error: "Invalid JSON from projects API" };
+        data = { error: text };
       }
     }
     if (!res.ok) return NextResponse.json(data, { status: res.status });

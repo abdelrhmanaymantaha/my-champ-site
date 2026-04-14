@@ -46,7 +46,15 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
-    const data = await res.json();
+    const text = await res.text();
+    let data: Record<string, unknown> = {};
+    if (text) {
+      try {
+        data = JSON.parse(text) as Record<string, unknown>;
+      } catch {
+        data = { error: text };
+      }
+    }
     if (!res.ok) return NextResponse.json(data, { status: res.status });
     return NextResponse.json(data);
   } catch (e) {

@@ -144,7 +144,20 @@ export default function AdminDashboardPage() {
     save({ socialMedia: content.socialMedia });
   };
 
-  const slugify = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const slugify = (t: string) => {
+    const base = t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    // Keep slug always non-empty for stricter backend validation.
+    return base || `project-${Date.now()}`;
+  };
+
+  const normalizeProjectType = (section: string): "branding" | "motion" => {
+    return section === "motion" ? "motion" : "branding";
+  };
+
+  const normalizeImageList = (images: string[] | undefined): string[] => {
+    if (!images?.length) return [];
+    return images.map((s) => s.trim()).filter(Boolean);
+  };
 
   const uploadOneImage = async (setUploading: (v: boolean) => void, setProgress?: (pct: number) => void, file?: File): Promise<string | null> => {
     if (!file) return null;
@@ -281,16 +294,23 @@ export default function AdminDashboardPage() {
     setSaving(true);
     setMessage(null);
     try {
+      const title = newProject.title.trim();
+      const slug = (newProject.slug?.trim() || slugify(title)).trim();
+      const description = (newProject.description ?? "").trim();
+      const gif = newProject.gif.trim();
+      const images = normalizeImageList(newProject.images);
+      const project_type = normalizeProjectType(newProject.section);
+
       const res = await fetch("/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: newProject.title.trim(),
-          slug: (newProject.slug?.trim() || slugify(newProject.title.trim())),
-          description: (newProject.description ?? "").trim(),
-          gif: newProject.gif.trim(),
-          images: newProject.images ?? [],
-          project_type: newProject.section,
+          title,
+          slug,
+          description,
+          gif,
+          images,
+          project_type,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -338,25 +358,40 @@ export default function AdminDashboardPage() {
     setSaving(true);
     setMessage(null);
     try {
+      const title = editProjectDraft.title.trim();
+      const slug = (editProjectDraft.slug?.trim() || slugify(title)).trim();
+      const description = (editProjectDraft.description ?? "").trim();
+      const gif = editProjectDraft.gif.trim();
+      const images = normalizeImageList(editProjectDraft.images);
+      const project_type = normalizeProjectType(editingProject.section);
+
       const res = await fetch(`/api/projects/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: editProjectDraft.title,
-          slug: editProjectDraft.slug,
-          description: (editProjectDraft.description ?? "").trim(),
-          gif: editProjectDraft.gif,
-          images: editProjectDraft.images ?? [],
-          project_type: editingProject.section,
+          title,
+          slug,
+          description,
+          gif,
+          images,
+          project_type,
         }),
       });
-      if (!res.ok) throw new Error("Failed to update project");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg = (data as { detail?: unknown; message?: unknown; error?: unknown }).detail
+          ?? (data as { detail?: unknown; message?: unknown; error?: unknown }).message
+          ?? (data as { detail?: unknown; message?: unknown; error?: unknown }).error
+          ?? "Failed to update project";
+        const text = Array.isArray(msg) ? msg.map((x: { msg?: string }) => x.msg ?? JSON.stringify(x)).join(", ") : String(msg);
+        throw new Error(text);
+      }
       setEditingProject(null);
       setEditProjectDraft(null);
       setMessage({ type: "success", text: "Project updated!" });
       await refetchContent();
-    } catch {
-      setMessage({ type: "error", text: "Failed to update project" });
+    } catch (err) {
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to update project" });
     } finally {
       setSaving(false);
     }
