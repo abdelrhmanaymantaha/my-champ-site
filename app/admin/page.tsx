@@ -147,6 +147,18 @@ export default function AdminDashboardPage() {
     save({ socialMedia: content.socialMedia });
   };
 
+  const saveAllContent = () => {
+    if (!content) return;
+    save({
+      hero: content.hero,
+      navbar: content.navbar,
+      sections: content.sections,
+      socialMedia: content.socialMedia,
+      about: content.about,
+      play: content.play,
+    });
+  };
+
   const slugify = (t: string) => {
     const base = t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     // Keep slug always non-empty for stricter backend validation.
@@ -462,39 +474,53 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] p-8 max-w-4xl mx-auto pb-20">
-      <div className="flex justify-between items-center mb-12">
-        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-        <div className="flex gap-4">
-          <Link href="/" className="text-sm opacity-70 hover:opacity-100">
-            ← View site
-          </Link>
-          <button
-            onClick={async () => {
-              await fetch("/api/admin/logout", { method: "POST" });
-              window.location.href = "/admin/login";
-            }}
-            className="text-sm opacity-70 hover:opacity-100"
-          >
-            Logout
-          </button>
+    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
+      <div className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-bg)]/95 backdrop-blur-sm">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 py-4 md:py-5 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] opacity-60">Admin</p>
+            <h1 className="text-lg sm:text-xl font-semibold">Content Dashboard</h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link href="/" className="text-sm opacity-70 hover:opacity-100">
+              View site
+            </Link>
+            <button
+              onClick={async () => {
+                await fetch("/api/admin/logout", { method: "POST" });
+                window.location.href = "/admin/login";
+              }}
+              className="text-sm opacity-70 hover:opacity-100"
+            >
+              Logout
+            </button>
+            <button
+              type="button"
+              onClick={saveAllContent}
+              disabled={saving || uploadingCover || uploadingImages || uploadingAboutImage}
+              className="px-5 py-2 bg-[var(--color-text)] text-[var(--color-bg)] rounded font-medium disabled:opacity-50"
+            >
+              {saving ? "Saving..." : "Save All"}
+            </button>
+          </div>
         </div>
       </div>
 
-      {message && (
-        <p
-          className={`mb-6 text-sm ${
-            message.type === "success" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
-          }`}
-        >
-          {message.text}
-        </p>
-      )}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 pt-8 pb-20">
+        {message && (
+          <p
+            className={`mb-6 text-sm ${
+              message.type === "success" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+            }`}
+          >
+            {message.text}
+          </p>
+        )}
 
       {/* Hero */}
       <section className="mb-16">
         <h2 className="text-xl font-semibold mb-6">Hero Section</h2>
-        <form onSubmit={saveHero} className="space-y-4">
+        <div className="space-y-4">
           <div>
             <label className="block text-sm mb-1">Title</label>
             <input
@@ -538,20 +564,13 @@ export default function AdminDashboardPage() {
               + Add bullet
             </button>
           </div>
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-6 py-2 bg-[var(--color-text)] text-[var(--color-bg)] rounded font-medium disabled:opacity-50"
-          >
-            {saving ? "Saving..." : "Save Hero"}
-          </button>
-        </form>
+        </div>
       </section>
 
       {/* Navbar */}
       <section className="mb-16">
         <h2 className="text-xl font-semibold mb-6">Navbar</h2>
-        <form onSubmit={saveNavbar} className="space-y-4">
+        <div className="space-y-4">
           <div>
             <label className="block text-sm mb-1">Name</label>
             <input
@@ -568,20 +587,13 @@ export default function AdminDashboardPage() {
               className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
             />
           </div>
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-6 py-2 bg-[var(--color-text)] text-[var(--color-bg)] rounded font-medium disabled:opacity-50"
-          >
-            Save Navbar
-          </button>
-        </form>
+        </div>
       </section>
 
       {/* Section Titles */}
       <section className="mb-16">
         <h2 className="text-xl font-semibold mb-6">Section Titles</h2>
-        <form onSubmit={saveSections} className="space-y-4">
+        <div className="space-y-4">
           <div>
             <label className="block text-sm mb-1">About</label>
             <input
@@ -606,20 +618,13 @@ export default function AdminDashboardPage() {
               className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
             />
           </div>
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-6 py-2 bg-[var(--color-text)] text-[var(--color-bg)] rounded font-medium disabled:opacity-50"
-          >
-            Save Section Titles
-          </button>
-        </form>
+        </div>
       </section>
 
       {/* Social Media */}
       <section className="mb-16">
         <h2 className="text-xl font-semibold mb-6">Social Media Links</h2>
-        <form onSubmit={saveSocialMedia} className="space-y-4">
+        <div className="space-y-4">
           <div>
             <label className="block text-sm mb-1">LinkedIn URL</label>
             <input
@@ -660,20 +665,13 @@ export default function AdminDashboardPage() {
               className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
             />
           </div>
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-6 py-2 bg-[var(--color-text)] text-[var(--color-bg)] rounded font-medium disabled:opacity-50"
-          >
-            Save Social Media
-          </button>
-        </form>
+        </div>
       </section>
 
       {/* About */}
       <section className="mb-16">
         <h2 className="text-xl font-semibold mb-6">About Section</h2>
-        <form onSubmit={saveAbout} className="space-y-4">
+        <div className="space-y-4">
           <div>
             <label className="block text-sm mb-1">Title</label>
             <input
@@ -790,20 +788,13 @@ export default function AdminDashboardPage() {
               className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
             />
           </div>
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-6 py-2 bg-[var(--color-text)] text-[var(--color-bg)] rounded font-medium disabled:opacity-50"
-          >
-            Save About
-          </button>
-        </form>
+        </div>
       </section>
 
       {/* Play */}
       <section className="mb-16">
         <h2 className="text-xl font-semibold mb-6">Play Section</h2>
-        <form onSubmit={savePlay} className="space-y-4">
+        <div className="space-y-4">
           <div>
             <label className="block text-sm mb-1">Text</label>
             <textarea
@@ -813,14 +804,7 @@ export default function AdminDashboardPage() {
               className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
             />
           </div>
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-6 py-2 bg-[var(--color-text)] text-[var(--color-bg)] rounded font-medium disabled:opacity-50"
-          >
-            Save Play
-          </button>
-        </form>
+        </div>
       </section>
 
       {/* Projects */}
@@ -1232,6 +1216,7 @@ export default function AdminDashboardPage() {
           </div>
         ))}
       </section>
+      </div>
     </div>
   );
 }
