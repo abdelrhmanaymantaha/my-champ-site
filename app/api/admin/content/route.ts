@@ -5,6 +5,31 @@ import { getContent, saveContent } from "@/lib/content";
 import { fetchProjectsFromApi } from "@/lib/projects-api";
 import type { Project } from "@/lib/content";
 
+function unwrapNextImageUrl(value: string): string {
+  const raw = value.trim();
+  if (!raw) return raw;
+
+  try {
+    const parsed = new URL(raw, "http://localhost");
+    if (parsed.pathname !== "/_next/image") {
+      return raw;
+    }
+
+    const wrappedUrl = parsed.searchParams.get("url");
+    if (!wrappedUrl) {
+      return raw;
+    }
+
+    try {
+      return decodeURIComponent(wrappedUrl).trim() || raw;
+    } catch {
+      return wrappedUrl.trim() || raw;
+    }
+  } catch {
+    return raw;
+  }
+}
+
 async function isAuthenticated(): Promise<boolean> {
   const cookieStore = await cookies();
   const token = cookieStore.get(getSessionCookie())?.value;
@@ -49,7 +74,13 @@ export async function POST(request: Request) {
     const body = await request.json();
     const content = getContent();
     if (body.hero) content.hero = { ...content.hero, ...body.hero };
-    if (body.about) content.about = { ...content.about, ...body.about };
+    if (body.about) {
+      const normalizedAbout = { ...body.about } as Record<string, unknown>;
+      if (typeof normalizedAbout.image === "string") {
+        normalizedAbout.image = unwrapNextImageUrl(normalizedAbout.image);
+      }
+      content.about = { ...content.about, ...normalizedAbout };
+    }
     // Projects are managed via the external API (POST/PATCH/DELETE /api/projects), not saved here
     if (body.play) content.play = { ...content.play, ...body.play };
     if (body.navbar) content.navbar = { ...content.navbar, ...body.navbar };

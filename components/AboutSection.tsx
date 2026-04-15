@@ -3,6 +3,27 @@
 import Image from "next/image";
 import styles from "./about.module.css";
 
+function unwrapNextImageUrl(value: string): string {
+  const raw = value.trim();
+  if (!raw) return raw;
+
+  try {
+    const parsed = new URL(raw, "http://localhost");
+    if (parsed.pathname !== "/_next/image") return raw;
+
+    const wrappedUrl = parsed.searchParams.get("url");
+    if (!wrappedUrl) return raw;
+
+    try {
+      return decodeURIComponent(wrappedUrl).trim() || raw;
+    } catch {
+      return wrappedUrl.trim() || raw;
+    }
+  } catch {
+    return raw;
+  }
+}
+
 type AboutContent = {
   title: string;
   subtitle: string;
@@ -18,6 +39,9 @@ export default function About({ content }: { content: AboutContent }) {
   const titleParts = content.title.split(" ");
   const firstWord = titleParts[0] || "";
   const rest = titleParts.slice(1).join(" ");
+  const imageSrc = unwrapNextImageUrl(content.image || "") || "/me.jpg";
+  const isExternalImage = imageSrc.startsWith("http://") || imageSrc.startsWith("https://");
+
   return (
     <main className={styles.container}>
       <section className={styles.hero}>
@@ -36,12 +60,13 @@ export default function About({ content }: { content: AboutContent }) {
         <div className={styles.imageWrapper}>
           <div className={styles.imageFrame}>
             <Image
-              src={content.image || "/me.jpg"}
+              src={imageSrc}
               alt="Profile"
               width={500}
               height={600}
               className={styles.image}
               priority
+              unoptimized={isExternalImage}
             />
           </div>
         </div>
