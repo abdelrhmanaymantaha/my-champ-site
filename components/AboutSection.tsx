@@ -6,6 +6,7 @@ import styles from "./about.module.css";
 type AboutContent = {
   title: string;
   subtitle: string;
+  image: string;
   mainText: string;
   description: string;
   quote: string;
@@ -35,7 +36,7 @@ export default function About({ content }: { content: AboutContent }) {
         <div className={styles.imageWrapper}>
           <div className={styles.imageFrame}>
             <Image
-              src="/me.jpg"
+              src={content.image || "/me.jpg"}
               alt="Profile"
               width={500}
               height={600}

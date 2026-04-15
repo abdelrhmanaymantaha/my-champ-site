@@ -6,6 +6,7 @@ import Link from "next/link";
 type AboutContent = {
   title: string;
   subtitle: string;
+  image: string;
   mainText: string;
   description: string;
   quote: string;
@@ -77,6 +78,8 @@ export default function AdminDashboardPage() {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [coverProgress, setCoverProgress] = useState(0);
   const [imageProgressMap, setImageProgressMap] = useState<Record<string, number>>({});
+  const [uploadingAboutImage, setUploadingAboutImage] = useState(false);
+  const [aboutImageProgress, setAboutImageProgress] = useState(0);
 
   useEffect(() => {
     fetch("/api/admin/content")
@@ -229,6 +232,7 @@ export default function AdminDashboardPage() {
   };
 
   const uploadCoverImage = (file: File) => uploadOneImage(setUploadingCover, setCoverProgress, file);
+  const uploadAboutImage = (file: File) => uploadOneImage(setUploadingAboutImage, setAboutImageProgress, file);
 
   const uploadMultipleImages = async (files: FileList | File[]): Promise<string[]> => {
     const fileArray = Array.from(files);
@@ -683,6 +687,63 @@ export default function AdminDashboardPage() {
             <input
               value={content.about.subtitle}
               onChange={(e) => setContent({ ...content, about: { ...content.about, subtitle: e.target.value } })}
+              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-sm mb-1">Profile Image</label>
+            {(content.about.image || "").trim() ? (
+              <div className="relative inline-block">
+                <div className="w-32 h-32 rounded-lg overflow-hidden border border-[var(--color-border)] bg-[var(--color-card)]">
+                  <img src={content.about.image} alt="About profile" className="w-full h-full object-cover" />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setContent({ ...content, about: { ...content.about, image: "" } })}
+                  className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-red-500/90 text-white text-sm leading-none flex items-center justify-center hover:bg-red-600 shadow"
+                  aria-label="Remove about image"
+                >
+                  ×
+                </button>
+              </div>
+            ) : null}
+            {aboutImageProgress > 0 && aboutImageProgress < 100 && (
+              <div className="space-y-1">
+                <div className="flex justify-between items-center text-xs opacity-60">
+                  <span>Uploading image...</span>
+                  <span>{aboutImageProgress}%</span>
+                </div>
+                <div className="w-32 h-2 bg-[var(--color-border)] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-blue-500 transition-all"
+                    style={{ width: `${aboutImageProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+            <div className="flex flex-wrap gap-2 items-center">
+              <label className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded cursor-pointer hover:opacity-90">
+                <input
+                  type="file"
+                  accept="image/*,.gif"
+                  className="sr-only"
+                  disabled={uploadingAboutImage}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const url = await uploadAboutImage(file);
+                    if (url) setContent({ ...content, about: { ...content.about, image: url } });
+                    e.target.value = "";
+                  }}
+                />
+                {uploadingAboutImage ? "Uploading…" : "Upload from PC"}
+              </label>
+            </div>
+            <input
+              type="url"
+              placeholder="https://... or /uploads/..."
+              value={content.about.image || ""}
+              onChange={(e) => setContent({ ...content, about: { ...content.about, image: e.target.value } })}
               className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
             />
           </div>

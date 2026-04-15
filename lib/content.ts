@@ -6,6 +6,7 @@ const CONTENT_FILE = path.join(process.cwd(), "data", "content.json");
 export type AboutContent = {
   title: string;
   subtitle: string;
+  image: string;
   mainText: string;
   description: string;
   quote: string;
@@ -82,6 +83,7 @@ const defaultContent: Content = {
   about: {
     title: "Please Call Me aleven",
     subtitle: "— Motion Designer —",
+    image: "/me.jpg",
     mainText: "At Aleven, creativity moves with purpose.",
     description: "Specializing in seamless looping animations...",
     quote: "Driven by a passion for bold visuals...",

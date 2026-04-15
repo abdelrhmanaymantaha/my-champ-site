@@ -54,6 +54,7 @@ export async function POST(request: Request) {
     if (body.play) content.play = { ...content.play, ...body.play };
     if (body.navbar) content.navbar = { ...content.navbar, ...body.navbar };
     if (body.sections) content.sections = { ...content.sections, ...body.sections };
+    if (body.socialMedia) content.socialMedia = { ...content.socialMedia, ...body.socialMedia };
     saveContent(content);
     return NextResponse.json({ success: true });
   } catch {
