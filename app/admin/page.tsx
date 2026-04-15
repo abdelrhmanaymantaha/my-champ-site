@@ -111,42 +111,6 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const saveHero = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!content) return;
-    save({ hero: content.hero });
-  };
-
-  const saveAbout = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!content) return;
-    save({ about: content.about });
-  };
-
-  const savePlay = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!content) return;
-    save({ play: content.play });
-  };
-
-  const saveNavbar = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!content) return;
-    save({ navbar: content.navbar });
-  };
-
-  const saveSections = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!content) return;
-    save({ sections: content.sections });
-  };
-
-  const saveSocialMedia = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!content) return;
-    save({ socialMedia: content.socialMedia });
-  };
-
   const saveAllContent = () => {
     if (!content) return;
     save({
