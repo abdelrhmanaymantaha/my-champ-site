@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 
 type AboutContent = {
   title: string;
@@ -66,6 +67,75 @@ type Content = {
   socialMedia: SocialMedia;
 };
 
+const WhiteCard = ({ children, title, subtitle, className = "" }: { children: React.ReactNode; title?: string; subtitle?: string; className?: string }) => (
+  <div className={`bg-white rounded-xl shadow-xl ring-1 ring-gray-900/5 p-6 md:p-8 relative overflow-hidden group ${className}`}>
+    {title && (
+      <div className="mb-6 relative z-10 text-center md:text-left">
+        <h3 className="text-xl font-semibold text-gray-900 mb-1">{title}</h3>
+        {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+      </div>
+    )}
+    <div className="relative z-10">{children}</div>
+  </div>
+);
+
+const FloatingInput = ({ id, label, className = "", ...props }: React.InputHTMLAttributes<HTMLInputElement> & { id: string; label: string }) => (
+  <div className={`relative mt-6 z-0 ${className}`}>
+    <input
+      id={id}
+      placeholder={label}
+      {...props}
+      className={`peer mt-1 w-full border-0 border-b-2 border-gray-300 px-0 py-1.5 placeholder:text-transparent focus:border-gray-500 focus:outline-none text-gray-900 bg-transparent text-base transition-colors ${props.className || ""}`}
+    />
+    <label
+      htmlFor={id}
+      className="pointer-events-none absolute top-0 left-0 origin-left -translate-y-1/2 transform text-sm text-gray-800 opacity-75 transition-all duration-100 ease-in-out peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:top-0 peer-focus:pl-0 peer-focus:text-sm peer-focus:text-gray-800"
+    >
+      {label}
+    </label>
+  </div>
+);
+
+const FloatingTextArea = ({ id, label, className = "", ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { id: string; label: string }) => (
+  <div className={`relative mt-6 z-0 ${className}`}>
+    <textarea
+      id={id}
+      placeholder={label}
+      {...props}
+      className={`peer mt-1 w-full border-0 border-b-2 border-gray-300 px-0 py-2 placeholder:text-transparent focus:border-gray-500 focus:outline-none text-gray-900 bg-transparent text-base transition-colors resize-none ${props.className || ""}`}
+    />
+    <label
+      htmlFor={id}
+      className="pointer-events-none absolute top-0 left-0 origin-left -translate-y-1/2 transform text-sm text-gray-800 opacity-75 transition-all duration-100 ease-in-out peer-placeholder-shown:top-6 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:top-0 peer-focus:pl-0 peer-focus:text-sm peer-focus:text-gray-800"
+    >
+      {label}
+    </label>
+  </div>
+);
+
+const FloatingSelect = ({ id, label, children, className = "", ...props }: React.SelectHTMLAttributes<HTMLSelectElement> & { id: string; label: string }) => (
+  <div className={`relative mt-6 z-0 ${className}`}>
+    <select
+      id={id}
+      {...props}
+      className={`peer mt-1 w-full border-0 border-b-2 border-gray-300 px-0 py-2 focus:border-gray-500 focus:outline-none text-gray-900 bg-transparent text-base transition-colors ${props.className || ""}`}
+    >
+      {children}
+    </select>
+    <label
+      htmlFor={id}
+      className="pointer-events-none absolute top-0 left-0 origin-left -translate-y-1/2 transform text-sm text-gray-800 opacity-75 transition-all duration-100 ease-in-out"
+    >
+      {label}
+    </label>
+    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+      <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+    </div>
+  </div>
+);
+
+import AnimatedBackground from "@/components/AnimatedBackground";
+
 export default function AdminDashboardPage() {
   const [content, setContent] = useState<Content | null>(null);
   const [loading, setLoading] = useState(true);
@@ -125,7 +195,6 @@ export default function AdminDashboardPage() {
 
   const slugify = (t: string) => {
     const base = t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    // Keep slug always non-empty for stricter backend validation.
     return base || `project-${Date.now()}`;
   };
 
@@ -151,7 +220,6 @@ export default function AdminDashboardPage() {
 
       xhr.upload.onprogress = (event) => {
         if (setProgress && event.lengthComputable && event.total > 0) {
-          // Cap at 90% during upload, leave 10% for server processing
           const pct = Math.max(0, Math.min(90, Math.round((event.loaded / event.total) * 90)));
           setProgress(pct);
         }
@@ -160,9 +228,7 @@ export default function AdminDashboardPage() {
       return new Promise((resolve) => {
         xhr.onload = () => {
           try {
-            // Set progress to 100% once response is received
             if (setProgress) setProgress(100);
-            
             const text = xhr.responseText || "{}";
             const data = JSON.parse(text) as { urls?: string[]; error?: unknown; detail?: unknown };
             if (xhr.status >= 200 && xhr.status < 300) {
@@ -183,10 +249,7 @@ export default function AdminDashboardPage() {
             resolve(null);
           } finally {
             setUploading(false);
-            // Small delay before clearing progress
-            setTimeout(() => {
-              if (setProgress) setProgress(0);
-            }, 500);
+            setTimeout(() => { if (setProgress) setProgress(0); }, 500);
           }
         };
 
@@ -196,7 +259,6 @@ export default function AdminDashboardPage() {
           if (setProgress) setProgress(0);
           resolve(null);
         };
-
         xhr.send(formData);
       });
     } catch {
@@ -213,40 +275,25 @@ export default function AdminDashboardPage() {
   const uploadMultipleImages = async (files: FileList | File[]): Promise<string[]> => {
     const fileArray = Array.from(files);
     if (fileArray.length === 0) return [];
-    
     setUploadingImages(true);
     setMessage(null);
-    
-    // Initialize progress map
     const initMap: Record<string, number> = {};
-    fileArray.forEach((_, idx) => {
-      initMap[`file-${idx}`] = 0;
-    });
+    fileArray.forEach((_, idx) => { initMap[`file-${idx}`] = 0; });
     setImageProgressMap(initMap);
 
     try {
-      // Upload with concurrency limit of 3 files at a time
       const concurrencyLimit = 3;
       const results: (string | null)[] = new Array(fileArray.length).fill(null);
-      
       const uploadFile = async (idx: number) => {
         const file = fileArray[idx];
         const key = `file-${idx}`;
-        const url = await uploadOneImage(setUploadingImages, (pct) => {
+        results[idx] = await uploadOneImage(setUploadingImages, (pct) => {
           setImageProgressMap((prev) => ({ ...prev, [key]: pct }));
         }, file);
-        results[idx] = url;
       };
-
-      // Create upload tasks
-      const uploadTasks = fileArray.map((_, idx) => uploadFile(idx));
-      
-      // Execute with concurrency limit
-      for (let i = 0; i < uploadTasks.length; i += concurrencyLimit) {
-        const batch = uploadTasks.slice(i, i + concurrencyLimit);
-        await Promise.all(batch);
+      for (let i = 0; i < fileArray.length; i += concurrencyLimit) {
+        await Promise.all(fileArray.slice(i, i + concurrencyLimit).map((_, idx) => uploadFile(i + idx)));
       }
-
       return results.filter((url) => url !== null) as string[];
     } catch {
       setMessage({ type: "error", text: "Failed to upload images" });
@@ -284,21 +331,10 @@ export default function AdminDashboardPage() {
       const res = await fetch("/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          slug,
-          description,
-          gif,
-          images,
-          project_type,
-        }),
+        body: JSON.stringify({ title, slug, description, gif, images, project_type }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        const msg = data.detail ?? data.message ?? data.error ?? "Failed to add project";
-        const text = Array.isArray(msg) ? msg.map((x: { msg?: string }) => x.msg ?? JSON.stringify(x)).join(", ") : String(msg);
-        throw new Error(text);
-      }
+      if (!res.ok) throw new Error(data.message || data.error || "Failed to add project");
       setNewProject({ title: "", slug: "", description: "", gif: "", images: [], section: "branding" });
       setMessage({ type: "success", text: "Project added!" });
       await refetchContent();
@@ -331,47 +367,21 @@ export default function AdminDashboardPage() {
     if (!content || !editingProject || !editProjectDraft) return;
     const p = content.projects[editingProject.section][editingProject.index];
     const id = p.id;
-    if (id == null) {
-      setMessage({ type: "error", text: "Project has no id" });
-      return;
-    }
+    if (id == null) return;
     setSaving(true);
-    setMessage(null);
     try {
-      const title = editProjectDraft.title.trim();
-      const slug = (editProjectDraft.slug?.trim() || slugify(title)).trim();
-      const description = (editProjectDraft.description ?? "").trim();
-      const gif = editProjectDraft.gif.trim();
-      const images = normalizeImageList(editProjectDraft.images);
-      const project_type = normalizeProjectType(editingProject.section);
-
       const res = await fetch(`/api/projects/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          slug,
-          description,
-          gif,
-          images,
-          project_type,
-        }),
+        body: JSON.stringify({ ...editProjectDraft, project_type: editingProject.section }),
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        const msg = (data as { detail?: unknown; message?: unknown; error?: unknown }).detail
-          ?? (data as { detail?: unknown; message?: unknown; error?: unknown }).message
-          ?? (data as { detail?: unknown; message?: unknown; error?: unknown }).error
-          ?? "Failed to update project";
-        const text = Array.isArray(msg) ? msg.map((x: { msg?: string }) => x.msg ?? JSON.stringify(x)).join(", ") : String(msg);
-        throw new Error(text);
-      }
+      if (!res.ok) throw new Error("Failed to update");
       setEditingProject(null);
       setEditProjectDraft(null);
       setMessage({ type: "success", text: "Project updated!" });
       await refetchContent();
-    } catch (err) {
-      setMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to update project" });
+    } catch {
+      setMessage({ type: "error", text: "Failed to update project" });
     } finally {
       setSaving(false);
     }
@@ -379,21 +389,17 @@ export default function AdminDashboardPage() {
 
   const removeProject = async (section: "branding" | "motion", index: number) => {
     if (!content) return;
-    const p = content.projects[section][index];
-    const id = p.id;
-    if (id == null) {
-      setMessage({ type: "error", text: "Project has no id" });
-      return;
-    }
+    const id = content.projects[section][index].id;
+    if (id == null) return;
+    if (!confirm("Are you sure you want to delete this project?")) return;
     setSaving(true);
-    setMessage(null);
     try {
       const res = await fetch(`/api/projects/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete project");
-      setMessage({ type: "success", text: "Project deleted!" });
+      if (!res.ok) throw new Error("Failed to delete");
+      setMessage({ type: "success", text: "Deleted!" });
       await refetchContent();
     } catch {
-      setMessage({ type: "error", text: "Failed to delete project" });
+      setMessage({ type: "error", text: "Failed to delete" });
     } finally {
       setSaving(false);
     }
@@ -401,786 +407,300 @@ export default function AdminDashboardPage() {
 
   const addBulletPoint = () => {
     if (!content) return;
-    setContent({
-      ...content,
-      hero: {
-        ...content.hero,
-        bulletPoints: [...content.hero.bulletPoints, ""],
-      },
-    });
+    setContent({ ...content, hero: { ...content.hero, bulletPoints: [...content.hero.bulletPoints, ""] } });
   };
 
   const removeBulletPoint = (index: number) => {
     if (!content || content.hero.bulletPoints.length <= 1) return;
-    setContent({
-      ...content,
-      hero: {
-        ...content.hero,
-        bulletPoints: content.hero.bulletPoints.filter((_, i) => i !== index),
-      },
-    });
+    setContent({ ...content, hero: { ...content.hero, bulletPoints: content.hero.bulletPoints.filter((_, i) => i !== index) } });
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] text-[var(--color-text)]">
-        <p className="opacity-70">Loading...</p>
-      </div>
-    );
-  }
-
-  if (!content) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] text-[var(--color-text)]">
-        <p className="opacity-70">Failed to load</p>
-      </div>
-    );
-  }
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-black text-white/50 text-sm tracking-widest uppercase">Loading...</div>;
+  if (!content) return <div className="min-h-screen flex items-center justify-center bg-black text-white/50 text-sm">Failed to load content</div>;
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
-      <div className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-bg)]/95 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 py-4 md:py-5 flex items-center justify-between gap-3">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] opacity-60">Admin</p>
-            <h1 className="text-lg sm:text-xl font-semibold">Content Dashboard</h1>
+    <main className="w-full flex flex-col items-center relative min-h-screen text-gray-900 bg-[#0b1215]">
+      <AnimatedBackground />
+
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-[#0b1215]/80 border-b border-white/[0.06]">
+        <div className="w-full max-w-[1120px] mx-auto px-8 sm:px-10 lg:px-12 py-5 flex items-center justify-between gap-6">
+          <div className="flex items-center gap-3.5">
+            <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.4)]" />
+            <div>
+              <p className="text-[9px] uppercase tracking-[0.25em] text-white/30 mb-0.5 leading-none">Management</p>
+              <h1 className="text-lg font-semibold tracking-tight text-white leading-tight">Content Dashboard</h1>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Link href="/" className="text-sm opacity-70 hover:opacity-100">
-              View site
-            </Link>
-            <button
-              onClick={async () => {
-                await fetch("/api/admin/logout", { method: "POST" });
-                window.location.href = "/admin/login";
-              }}
-              className="text-sm opacity-70 hover:opacity-100"
-            >
-              Logout
-            </button>
-            <button
-              type="button"
-              onClick={saveAllContent}
-              disabled={saving || uploadingCover || uploadingImages || uploadingAboutImage}
-              className="px-5 py-2 bg-[var(--color-text)] text-[var(--color-bg)] rounded font-medium disabled:opacity-50"
-            >
+          <div className="flex items-center gap-4">
+            <Link href="/" className="text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white transition-colors hidden sm:block">View site</Link>
+            <div className="h-4 w-px bg-white/[0.08] hidden sm:block" />
+            <button type="button" onClick={saveAllContent} disabled={saving} className="px-6 py-2.5 bg-white text-black text-xs font-semibold rounded-md hover:bg-gray-200 active:scale-95 transition-all disabled:opacity-50">
               {saving ? "Saving..." : "Save All"}
             </button>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 pt-8 pb-20">
+      {/* ── Content ── */}
+      <div className="w-full max-w-[1120px] mx-auto px-8 sm:px-10 lg:px-12 pt-10 pb-32 relative z-10 flex flex-col">
+
+        {/* Toast */}
         {message && (
-          <p
-            className={`mb-6 text-sm ${
-              message.type === "success" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`mb-6 px-5 py-3 rounded-2xl text-sm border ${
+              message.type === "success"
+                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                : "bg-red-500/10 border-red-500/20 text-red-400"
             }`}
           >
             {message.text}
-          </p>
+          </motion.div>
         )}
 
-      {/* Hero */}
-      <section className="mb-16">
-        <h2 className="text-xl font-semibold mb-6">Hero Section</h2>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm mb-1">Title</label>
-            <input
-              value={content.hero.title}
-              onChange={(e) => setContent({ ...content, hero: { ...content.hero, title: e.target.value } })}
-              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-            />
+        {/* ── HERO SECTION ── */}
+        <WhiteCard title="Hero Section" subtitle="The first impression of your portfolio">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <FloatingInput id="hero-title" label="Main Hero Title" value={content.hero.title} onChange={(e) => setContent({ ...content, hero: { ...content.hero, title: e.target.value } })} />
+            <FloatingInput id="hero-tagline" label="Header Tagline" value={content.hero.tagline} onChange={(e) => setContent({ ...content, hero: { ...content.hero, tagline: e.target.value } })} />
           </div>
-          <div>
-            <label className="block text-sm mb-1">Tagline</label>
-            <input
-              value={content.hero.tagline}
-              onChange={(e) => setContent({ ...content, hero: { ...content.hero, tagline: e.target.value } })}
-              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Bullet Points</label>
+          <div className="space-y-4">
+            <h4 className="text-sm text-gray-800 opacity-75 font-medium mb-2 mt-6">Value Propositions</h4>
             {content.hero.bulletPoints.map((bp, i) => (
-              <div key={i} className="flex gap-2 mb-2">
-                <textarea
-                  value={bp}
-                  onChange={(e) => {
-                    const pts = [...content.hero.bulletPoints];
-                    pts[i] = e.target.value;
-                    setContent({ ...content, hero: { ...content.hero, bulletPoints: pts } });
-                  }}
-                  rows={2}
-                  className="flex-1 px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeBulletPoint(i)}
-                  className="text-red-500 hover:underline shrink-0"
-                >
-                  Remove
+              <div key={i} className="flex gap-3">
+                <FloatingTextArea label={`Bullet Point ${i + 1}`} id={`bp-${i}`} value={bp} onChange={(e) => {
+                  const pts = [...content.hero.bulletPoints];
+                  pts[i] = e.target.value;
+                  setContent({ ...content, hero: { ...content.hero, bulletPoints: pts } });
+                }} rows={2} />
+                <button type="button" onClick={() => removeBulletPoint(i)} className="p-3 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all self-start border border-red-500/20 shrink-0">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                 </button>
               </div>
             ))}
-            <button type="button" onClick={addBulletPoint} className="text-sm opacity-70 hover:opacity-100 mt-2">
-              + Add bullet
-            </button>
+            <button type="button" onClick={addBulletPoint} className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/[0.08] bg-white/[0.04] text-[10px] uppercase tracking-[0.12em] text-white/40 hover:bg-white/[0.08] hover:text-white/70 transition-all">+ Add point</button>
           </div>
-        </div>
-      </section>
+        </WhiteCard>
 
-      {/* Navbar */}
-      <section className="mb-16">
-        <h2 className="text-xl font-semibold mb-6">Navbar</h2>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm mb-1">Name</label>
-            <input
-              value={content.navbar.name}
-              onChange={(e) => setContent({ ...content, navbar: { ...content.navbar, name: e.target.value } })}
-              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Location</label>
-            <input
-              value={content.navbar.location}
-              onChange={(e) => setContent({ ...content, navbar: { ...content.navbar, location: e.target.value } })}
-              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-            />
-          </div>
+        {/* ── BRANDING ROW: Navbar + Section Titles ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-8">
+          <WhiteCard title="Navbar Identity" subtitle="Global branding">
+            <div className="space-y-5">
+              <FloatingInput id="studio-name" label="Studio Name" value={content.navbar.name} onChange={(e) => setContent({ ...content, navbar: { ...content.navbar, name: e.target.value } })} />
+              <FloatingInput id="location-label" label="Location Label" value={content.navbar.location} onChange={(e) => setContent({ ...content, navbar: { ...content.navbar, location: e.target.value } })} />
+            </div>
+          </WhiteCard>
+          <WhiteCard title="Section Titles" subtitle="Display names for pages">
+            <div className="space-y-4">
+              <FloatingInput id="section-about" label="About" value={content.sections.about} onChange={(e) => setContent({ ...content, sections: { ...content.sections, about: e.target.value } })} />
+              <FloatingInput id="section-projects" label="Projects" value={content.sections.projects} onChange={(e) => setContent({ ...content, sections: { ...content.sections, projects: e.target.value } })} />
+              <FloatingInput id="section-play" label="Play" value={content.sections.play} onChange={(e) => setContent({ ...content, sections: { ...content.sections, play: e.target.value } })} />
+            </div>
+          </WhiteCard>
         </div>
-      </section>
 
-      {/* Section Titles */}
-      <section className="mb-16">
-        <h2 className="text-xl font-semibold mb-6">Section Titles</h2>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm mb-1">About</label>
-            <input
-              value={content.sections.about}
-              onChange={(e) => setContent({ ...content, sections: { ...content.sections, about: e.target.value } })}
-              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Projects</label>
-            <input
-              value={content.sections.projects}
-              onChange={(e) => setContent({ ...content, sections: { ...content.sections, projects: e.target.value } })}
-              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Play</label>
-            <input
-              value={content.sections.play}
-              onChange={(e) => setContent({ ...content, sections: { ...content.sections, play: e.target.value } })}
-              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Social Media */}
-      <section className="mb-16">
-        <h2 className="text-xl font-semibold mb-6">Social Media Links</h2>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm mb-1">LinkedIn URL</label>
-            <input
-              type="url"
-              value={content.socialMedia?.linkedin || ""}
-              onChange={(e) => setContent({ ...content, socialMedia: { ...content.socialMedia, linkedin: e.target.value } })}
-              placeholder="https://www.linkedin.com/in/yourprofile"
-              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Behance URL</label>
-            <input
-              type="url"
-              value={content.socialMedia?.behance || ""}
-              onChange={(e) => setContent({ ...content, socialMedia: { ...content.socialMedia, behance: e.target.value } })}
-              placeholder="https://www.behance.net/yourprofile"
-              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Facebook URL</label>
-            <input
-              type="url"
-              value={content.socialMedia?.facebook || ""}
-              onChange={(e) => setContent({ ...content, socialMedia: { ...content.socialMedia, facebook: e.target.value } })}
-              placeholder="https://www.facebook.com/yourprofile"
-              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Instagram URL</label>
-            <input
-              type="url"
-              value={content.socialMedia?.instagram || ""}
-              onChange={(e) => setContent({ ...content, socialMedia: { ...content.socialMedia, instagram: e.target.value } })}
-              placeholder="https://www.instagram.com/yourprofile"
-              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* About */}
-      <section className="mb-16">
-        <h2 className="text-xl font-semibold mb-6">About Section</h2>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm mb-1">Title</label>
-            <input
-              value={content.about.title}
-              onChange={(e) => setContent({ ...content, about: { ...content.about, title: e.target.value } })}
-              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Subtitle</label>
-            <input
-              value={content.about.subtitle}
-              onChange={(e) => setContent({ ...content, about: { ...content.about, subtitle: e.target.value } })}
-              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="block text-sm mb-1">Profile Image</label>
-            {(content.about.image || "").trim() ? (
-              <div className="relative inline-block">
-                <div className="w-32 h-32 rounded-lg overflow-hidden border border-[var(--color-border)] bg-[var(--color-card)]">
-                  <img src={content.about.image} alt="About profile" className="w-full h-full object-cover" />
+        {/* ── SOCIAL & ABOUT ROW ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start mt-8">
+          <WhiteCard title="Social Media" subtitle="Your online presence">
+            <div className="space-y-5">
+              <FloatingInput id="linkedin" label="LinkedIn" value={content.socialMedia?.linkedin || ""} onChange={(e) => setContent({ ...content, socialMedia: { ...content.socialMedia, linkedin: e.target.value } })} />
+              <FloatingInput id="behance" label="Behance" value={content.socialMedia?.behance || ""} onChange={(e) => setContent({ ...content, socialMedia: { ...content.socialMedia, behance: e.target.value } })} />
+              <FloatingInput id="instagram" label="Instagram" value={content.socialMedia?.instagram || ""} onChange={(e) => setContent({ ...content, socialMedia: { ...content.socialMedia, instagram: e.target.value } })} />
+            </div>
+          </WhiteCard>
+          <WhiteCard title="About Profile" subtitle="Your bio & avatar" className="lg:col-span-2">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr,auto] gap-6 mb-6">
+              <div className="space-y-5">
+                <FloatingInput id="headline" label="Headline" value={content.about.title} onChange={(e) => setContent({ ...content, about: { ...content.about, title: e.target.value } })} />
+                <FloatingInput id="sub-headline" label="Sub-headline" value={content.about.subtitle} onChange={(e) => setContent({ ...content, about: { ...content.about, subtitle: e.target.value } })} />
+              </div>
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Profile Avatar</h4>
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-20 h-20 rounded-2xl border border-white/[0.08] bg-white/[0.04] overflow-hidden">
+                    <img src={content.about.image} alt="" className="w-full h-full object-cover" />
+                  </div>
+                  <label className="px-3 py-1.5 rounded-lg bg-white/[0.08] text-white text-[9px] uppercase font-bold tracking-widest cursor-pointer hover:bg-white/[0.15] transition-all">
+                    Update
+                    <input type="file" className="hidden" onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const url = await uploadAboutImage(file);
+                        if (url) setContent({ ...content, about: { ...content.about, image: url } });
+                      }
+                    }} />
+                  </label>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setContent({ ...content, about: { ...content.about, image: "" } })}
-                  className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-red-500/90 text-white text-sm leading-none flex items-center justify-center hover:bg-red-600 shadow"
-                  aria-label="Remove about image"
-                >
-                  ×
+              </div>
+            </div>
+            <div className="space-y-5">
+              <FloatingTextArea id="main-description" label="Main Description" rows={4} value={content.about.mainText} onChange={(e) => setContent({ ...content, about: { ...content.about, mainText: e.target.value } })} />
+              <FloatingInput id="bottom-cta-title" label="Bottom CTA Title" value={content.about.bottomTitle} onChange={(e) => setContent({ ...content, about: { ...content.about, bottomTitle: e.target.value } })} />
+            </div>
+          </WhiteCard>
+        </div>
+
+        {/* ── PLAY SECTION ── */}
+        <div className="mt-8">
+          <WhiteCard title="Experimental / Play" subtitle="A space for non-project work">
+            <FloatingTextArea id="explanatory-text" label="Explanatory Text" rows={3} value={content.play.text} onChange={(e) => setContent({ ...content, play: { ...content.play, text: e.target.value } })} />
+          </WhiteCard>
+        </div>
+
+        {/* ── PROJECTS ── */}
+        <div className="mt-16">
+          <div className="flex items-end justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-semibold tracking-tight text-white mb-1">Projects</h2>
+              <p className="text-sm text-white/30">Manage your portfolio across categories.</p>
+            </div>
+          </div>
+
+          <WhiteCard title="Add New Project" subtitle="Expand your portfolio">
+            <form onSubmit={addProject} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-5">
+                  <FloatingInput id="proj-title" label="Project Title" value={newProject.title} onChange={(e) => setNewProject((prev) => ({ ...prev, title: e.target.value }))} placeholder="e.g. Minimalist Identity" />
+                  <FloatingInput id="proj-slug" label="Custom URL Slug (Optional)" value={newProject.slug} onChange={(e) => setNewProject((prev) => ({ ...prev, slug: e.target.value }))} placeholder="Leave blank to auto-generate" />
+                </div>
+                <div className="space-y-5">
+                  <FloatingSelect id="proj-section" label="Category" value={newProject.section} onChange={(e) => setNewProject((prev) => ({ ...prev, section: e.target.value as "branding" | "motion" }))}>
+<option value="branding">Branding</option>
+                      <option value="motion">Motion</option>
+                    
+</FloatingSelect>
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">Project Cover (GIF or Image)</h4>
+                    <div className="flex gap-3 items-center">
+                      <label className="flex-1 cursor-pointer">
+                        <div className={`py-3.5 text-center border border-dashed rounded-2xl transition-all ${uploadingCover ? "border-blue-500/50 text-blue-400 bg-blue-500/5" : "border-white/[0.08] text-white/25 hover:border-white/20 hover:text-white/40"}`}>
+                          <span className="text-[10px] uppercase font-bold tracking-widest">{uploadingCover ? `Uploading ${coverProgress}%` : "Upload Cover"}</span>
+                        </div>
+                        <input type="file" className="hidden" onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const url = await uploadCoverImage(file);
+                            if (url) setNewProject((prev) => ({ ...prev, gif: url }));
+                          }
+                        }} />
+                      </label>
+                      {newProject.gif && <div className="w-12 h-12 rounded-xl overflow-hidden border border-white/[0.08] shrink-0"><img src={newProject.gif} className="w-full h-full object-cover" alt="" /></div>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" disabled={saving || uploadingCover} className="w-full rounded-md bg-black px-3 py-4 text-white focus:bg-gray-800 hover:bg-gray-800 font-medium transition-all active:scale-[0.98] disabled:opacity-50 mt-6">
+                Create Project
+              </button>
+            </form>
+          </WhiteCard>
+
+          {(["branding", "motion"] as const).map((section) => (
+            <div key={section} className="mt-10">
+              <h3 className="text-[10px] uppercase tracking-[0.25em] text-white/20 mb-5 ml-1">{section} projects</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {(content.projects[section] ?? []).map((p, i) => (
+                  <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} key={p.slug + i} className="group/proj relative aspect-[4/3] rounded-3xl overflow-hidden border border-white/[0.08] bg-white/[0.03]">
+                    <img src={p.gif} alt={p.title} className="w-full h-full object-cover grayscale group-hover/proj:grayscale-0 transition-all duration-700 scale-100 group-hover/proj:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6 translate-y-2 group-hover/proj:translate-y-0 transition-transform duration-500">
+                      <h4 className="text-lg font-semibold text-white mb-0.5">{p.title}</h4>
+                      <p className="text-[10px] text-white/35 uppercase tracking-widest mb-4">{p.slug}</p>
+                      <div className="flex gap-2 opacity-0 group-hover/proj:opacity-100 transition-opacity duration-500">
+                        <button onClick={() => startEditProject(section, i)} className="flex-1 py-2.5 bg-white/10 backdrop-blur-md rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-all">Edit</button>
+                        <button onClick={() => removeProject(section, i)} className="px-3.5 py-2.5 bg-red-500/20 backdrop-blur-md rounded-xl text-red-400 hover:bg-red-500 hover:text-white transition-all"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Edit Modal ── */}
+      <AnimatePresence>
+        {editingProject && editProjectDraft && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8 overflow-hidden">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setEditingProject(null)} />
+            <motion.div initial={{ opacity: 0, scale: 0.96, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 16 }} className="w-full max-w-3xl bg-white rounded-xl shadow-xl ring-1 ring-gray-900/5 relative z-[110] overflow-hidden flex flex-col max-h-[85vh]">
+              <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between shrink-0">
+                <div>
+                  <h2 className="text-2xl font-semibold text-gray-900">Edit Project</h2>
+                  <p className="text-sm text-gray-500 mt-1">Refining {editProjectDraft.title}</p>
+                </div>
+                <button onClick={() => setEditingProject(null)} className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-all">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>
-            ) : null}
-            {aboutImageProgress > 0 && aboutImageProgress < 100 && (
-              <div className="space-y-1">
-                <div className="flex justify-between items-center text-xs opacity-60">
-                  <span>Uploading image...</span>
-                  <span>{aboutImageProgress}%</span>
-                </div>
-                <div className="w-32 h-2 bg-[var(--color-border)] rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-blue-500 transition-all"
-                    style={{ width: `${aboutImageProgress}%` }}
-                  />
-                </div>
-              </div>
-            )}
-            <div className="flex flex-wrap gap-2 items-center">
-              <label className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded cursor-pointer hover:opacity-90">
-                <input
-                  type="file"
-                  accept="image/*,.gif"
-                  className="sr-only"
-                  disabled={uploadingAboutImage}
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    const url = await uploadAboutImage(file);
-                    if (url) setContent({ ...content, about: { ...content.about, image: url } });
-                    e.target.value = "";
-                  }}
-                />
-                {uploadingAboutImage ? "Uploading…" : "Upload from PC"}
-              </label>
-            </div>
-            <input
-              type="url"
-              placeholder="https://... or /uploads/..."
-              value={content.about.image || ""}
-              onChange={(e) => setContent({ ...content, about: { ...content.about, image: e.target.value } })}
-              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Main Text</label>
-            <textarea
-              value={content.about.mainText}
-              onChange={(e) => setContent({ ...content, about: { ...content.about, mainText: e.target.value } })}
-              rows={6}
-              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Description</label>
-            <textarea
-              value={content.about.description}
-              onChange={(e) => setContent({ ...content, about: { ...content.about, description: e.target.value } })}
-              rows={3}
-              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Quote</label>
-            <textarea
-              value={content.about.quote}
-              onChange={(e) => setContent({ ...content, about: { ...content.about, quote: e.target.value } })}
-              rows={2}
-              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Bottom Title</label>
-            <input
-              value={content.about.bottomTitle}
-              onChange={(e) => setContent({ ...content, about: { ...content.about, bottomTitle: e.target.value } })}
-              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Bottom Text</label>
-            <input
-              value={content.about.bottomText}
-              onChange={(e) => setContent({ ...content, about: { ...content.about, bottomText: e.target.value } })}
-              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Play */}
-      <section className="mb-16">
-        <h2 className="text-xl font-semibold mb-6">Play Section</h2>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm mb-1">Text</label>
-            <textarea
-              value={content.play.text}
-              onChange={(e) => setContent({ ...content, play: { ...content.play, text: e.target.value } })}
-              rows={3}
-              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Projects */}
-      <section>
-        <h2 className="text-xl font-semibold mb-6">Projects</h2>
-        <p className="text-sm opacity-70 mb-4">
-          Project schema: <strong>title</strong>, <strong>slug</strong> (URL), <strong>description</strong>, <strong>cover (gif)</strong>, <strong>images</strong> (list). Additional images can be added when editing.
-        </p>
-        <form onSubmit={addProject} className="flex flex-col gap-4 mb-8">
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              <input
-                type="text"
-                placeholder="Project title"
-                value={newProject.title}
-                onChange={(e) => setNewProject((prev) => ({ ...prev, title: e.target.value }))}
-                className="flex-1 min-w-[200px] px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-                aria-label="Project title"
-              />
-              <select
-                value={newProject.section}
-                onChange={(e) => setNewProject((prev) => ({ ...prev, section: e.target.value as "branding" | "motion" }))}
-                className="px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-                aria-label="Project section"
-              >
-                <option value="branding">Branding</option>
-                <option value="motion">Motion</option>
-              </select>
-            </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">URL slug (optional)</label>
-              <input
-                type="text"
-                placeholder="Leave empty to generate from title (e.g. my-project → /project/my-project)"
-                value={newProject.slug}
-                onChange={(e) => setNewProject((prev) => ({ ...prev, slug: e.target.value }))}
-                className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-                aria-label="URL slug"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Cover image (gif) — required</label>
-              {newProject.gif ? (
-                <div className="relative inline-block group">
-                  <div className="w-32 h-32 rounded-lg overflow-hidden border border-[var(--color-border)] bg-[var(--color-card)]">
-                    <img src={newProject.gif} alt="Cover" className="w-full h-full object-cover" />
+              <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-5">
+                    <FloatingInput id="project-title" label="Project Title" value={editProjectDraft.title} onChange={(e) => setEditProjectDraft({ ...editProjectDraft, title: e.target.value })} />
+                    <FloatingInput id="url-slug" label="URL Slug" value={editProjectDraft.slug} onChange={(e) => setEditProjectDraft({ ...editProjectDraft, slug: e.target.value })} />
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setNewProject((prev) => ({ ...prev, gif: "" }))}
-                    className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-red-500/90 text-white text-sm leading-none flex items-center justify-center hover:bg-red-600 shadow"
-                    aria-label="Remove cover image"
-                  >
-                    ×
-                  </button>
-                </div>
-              ) : null}
-              {coverProgress > 0 && coverProgress < 100 && (
-                <div className="space-y-1">
-                  <div className="flex justify-between items-center text-xs opacity-60">
-                    <span>Uploading cover...</span>
-                    <span>{coverProgress}%</span>
-                  </div>
-                  <div className="w-32 h-2 bg-[var(--color-border)] rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-blue-500 transition-all"
-                      style={{ width: `${coverProgress}%` }}
-                    />
+                  <div className="space-y-5">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">Cover image (gif)</h4>
+                    <div className="flex gap-4 items-center">
+                      <div className="w-28 aspect-[4/3] rounded-2xl border border-white/[0.08] overflow-hidden"><img src={editProjectDraft.gif} className="w-full h-full object-cover" alt="" /></div>
+                      <label className="px-3.5 py-2 rounded-xl bg-white/[0.08] text-white text-[9px] uppercase font-bold tracking-widest cursor-pointer hover:bg-white/[0.15] transition-all">
+                        Change GIF
+                        <input type="file" className="hidden" onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const url = await uploadCoverImage(file);
+                            if (url) setEditProjectDraft({ ...editProjectDraft, gif: url });
+                          }
+                        }} />
+                      </label>
+                    </div>
                   </div>
                 </div>
-              )}
-              <div className="flex flex-wrap gap-2 items-center mt-2">
-                <label className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded cursor-pointer hover:opacity-90">
-                  <input
-                    type="file"
-                    accept="image/*,.gif"
-                    className="sr-only"
-                    disabled={uploadingCover}
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      const url = await uploadCoverImage(file);
-                      console.log("Uploaded cover image URL:", url);
-                      if (url) setNewProject((prev) => ({ ...prev, gif: url }));
-                      e.target.value = "";
-                    }}
-                  />
-                  {uploadingCover ? "Uploading…" : newProject.gif ? "Change cover" : "Upload from PC"}
-                </label>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Description (optional)</label>
-              <textarea
-                placeholder="Short project description..."
-                value={newProject.description}
-                onChange={(e) => setNewProject((prev) => ({ ...prev, description: e.target.value }))}
-                rows={3}
-                className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-                aria-label="Project description"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Images (optional) — gallery images</label>
-              {(newProject.images?.length ?? 0) > 0 && (
-                <ul className="flex flex-wrap gap-3 list-none p-0 m-0">
-                  {(newProject.images ?? []).map((url, idx) => (
-                    <li key={idx} className="relative group">
-                      <div className="w-20 h-20 rounded-lg overflow-hidden border border-[var(--color-border)] bg-[var(--color-card)]">
-                        <img 
-                          src={url} 
-                          alt="" 
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            console.error("Failed to load image:", url);
-                            e.currentTarget.style.display = 'none';
-                            e.currentTarget.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-xs text-red-500">Failed</div>';
-                          }}
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setNewProject((prev) => ({
-                            ...prev,
-                            images: (prev.images ?? []).filter((_, i) => i !== idx),
-                          }))
+                <FloatingTextArea id="description" label="Description" rows={3} value={editProjectDraft.description} onChange={(e) => setEditProjectDraft({ ...editProjectDraft, description: e.target.value })} />
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">Gallery Images</h4>
+                    <label className="px-4 py-2 rounded-xl bg-white text-black text-[9px] font-bold uppercase tracking-widest cursor-pointer hover:scale-95 transition-all">
+                      Add Images
+                      <input type="file" multiple className="hidden" onChange={async (e) => {
+                        if (e.target.files) {
+                          const urls = await uploadMultipleImages(e.target.files);
+                          setEditProjectDraft(prev => prev ? ({ ...prev, images: [...(prev.images || []), ...urls] }) : null);
                         }
-                        className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500/90 text-white text-xs leading-none flex items-center justify-center hover:bg-red-600 shadow"
-                        aria-label="Remove image"
-                      >
-                        ×
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {Object.keys(imageProgressMap).length > 0 && (
-                <div className="space-y-2 mt-3">
-                  <label className="block text-xs font-medium opacity-70">Uploading...</label>
-                  <div className="space-y-2">
-                    {Object.entries(imageProgressMap).map(([key, progress]) => (
-                      <div key={key} className="space-y-1">
-                        <div className="flex justify-between items-center text-xs opacity-60">
-                          <span>{key}</span>
-                          <span>{progress}%</span>
-                        </div>
-                        <div className="w-full h-2 bg-[var(--color-border)] rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-blue-500 transition-all"
-                            style={{ width: `${progress}%` }}
-                          />
-                        </div>
+                      }} />
+                    </label>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {(editProjectDraft.images || []).map((img, idx) => (
+                      <div key={idx} className="group relative aspect-square rounded-xl overflow-hidden border border-white/[0.08] bg-white/[0.04]">
+                        <img src={img} className="w-full h-full object-cover transition-opacity group-hover:opacity-40" alt="" />
+                        <button onClick={() => {
+                          const imgs = [...(editProjectDraft.images || [])];
+                          imgs.splice(idx, 1);
+                          setEditProjectDraft({ ...editProjectDraft, images: imgs });
+                        }} className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-red-500"><svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                       </div>
                     ))}
                   </div>
                 </div>
-              )}
-              <div className="flex flex-wrap gap-2 items-center">
-                <label className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded cursor-pointer hover:opacity-90">
-                  <input
-                    type="file"
-                    accept="image/*,.gif"
-                    multiple
-                    className="sr-only"
-                    disabled={uploadingImages}
-                    onChange={async (e) => {
-                      const files = e.target.files;
-                      if (!files?.length) return;
-                      const urls = await uploadMultipleImages(files);
-                      console.log("Uploaded image URLs:", urls);
-                      if (urls.length) setNewProject((prev) => ({ ...prev, images: [...(prev.images ?? []), ...urls] }));
-                      e.target.value = "";
-                    }}
-                  />
-                  {uploadingImages ? "Uploading…" : "Add more images"}
-                </label>
               </div>
-            </div>
-            <div className="flex justify-end">
-              <button
-                type="button"
-                disabled={saving || uploadingCover || uploadingImages}
-                onClick={doAddProject}
-                className="px-6 py-2 bg-[var(--color-text)] text-[var(--color-bg)] rounded font-medium disabled:opacity-50"
-              >
-                {saving ? "Adding…" : "Add Project"}
-              </button>
-            </div>
+              <div className="p-8 border-t border-gray-100 flex gap-3 shrink-0">
+                <button onClick={saveEditedProject} disabled={saving} className="flex-1 rounded-md bg-black px-3 py-4 text-white focus:bg-gray-800 hover:bg-gray-800 font-medium transition-all active:scale-[0.98]">Save Changes</button>
+                <button onClick={() => setEditingProject(null)} className="px-8 py-3.5 border border-gray-200 text-gray-700 rounded-md font-medium hover:bg-gray-50 transition-all">Cancel</button>
+              </div>
+            </motion.div>
           </div>
-        </form>
+        )}
+      </AnimatePresence>
 
-        {(["branding", "motion"] as const).map((section) => (
-          <div key={section} className="mb-12">
-            <h3 className="text-lg font-medium mb-4 capitalize">{section} Projects</h3>
-            <ul className="space-y-4">
-              {content.projects[section].map((p, i) => (
-                <li key={`${section}-${i}`} className="p-4 border border-[var(--color-border)] rounded-lg">
-                  {editingProject?.section === section && editingProject?.index === i && editProjectDraft ? (
-                    <div className="space-y-3">
-                      <div>
-                        <label className="block text-xs mb-1">Title</label>
-                        <input
-                          value={editProjectDraft.title}
-                          onChange={(e) => setEditProjectDraft({ ...editProjectDraft, title: e.target.value })}
-                          className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-                          placeholder="Project title"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1">URL slug (used in /project/your-slug)</label>
-                        <input
-                          value={editProjectDraft.slug}
-                          onChange={(e) => setEditProjectDraft({ ...editProjectDraft, slug: e.target.value })}
-                          className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-                          placeholder="e.g. abyan-trading"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1">Cover (gif)</label>
-                        {editProjectDraft.gif ? (
-                          <div className="relative inline-block mb-2">
-                            <div className="w-32 h-32 rounded-lg overflow-hidden border border-[var(--color-border)] bg-[var(--color-card)]">
-                              <img src={editProjectDraft.gif} alt="Cover" className="w-full h-full object-cover" />
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => setEditProjectDraft({ ...editProjectDraft, gif: "" })}
-                              className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-red-500/90 text-white text-sm leading-none flex items-center justify-center hover:bg-red-600 shadow"
-                              aria-label="Remove cover image"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ) : null}
-                        {coverProgress > 0 && coverProgress < 100 && (
-                          <div className="space-y-1 mb-2">
-                            <div className="flex justify-between items-center text-xs opacity-60">
-                              <span>Uploading cover...</span>
-                              <span>{coverProgress}%</span>
-                            </div>
-                            <div className="w-32 h-2 bg-[var(--color-border)] rounded-full overflow-hidden">
-                              <div
-                                className="h-full bg-blue-500 transition-all"
-                                style={{ width: `${coverProgress}%` }}
-                              />
-                            </div>
-                          </div>
-                        )}
-                        <label className="inline-flex items-center gap-2 px-3 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded cursor-pointer hover:opacity-90 text-sm">
-                          <input
-                            type="file"
-                            accept="image/*,.gif"
-                            className="sr-only"
-                            disabled={uploadingCover}
-                            onChange={async (e) => {
-                              const file = e.target.files?.[0];
-                              if (!file) return;
-                              const url = await uploadCoverImage(file);
-                              if (url && editProjectDraft) setEditProjectDraft({ ...editProjectDraft, gif: url });
-                              e.target.value = "";
-                            }}
-                          />
-                          {uploadingCover ? "Uploading…" : editProjectDraft.gif ? "Change cover" : "Upload from PC"}
-                        </label>
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1">Description</label>
-                        <textarea
-                          value={editProjectDraft.description ?? ""}
-                          onChange={(e) => setEditProjectDraft({ ...editProjectDraft, description: e.target.value })}
-                          rows={4}
-                          className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
-                          placeholder="Project description..."
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1">Images (gallery)</label>
-                        {(editProjectDraft.images?.length ?? 0) > 0 && (
-                          <ul className="flex flex-wrap gap-3 list-none p-0 m-0 mb-2">
-                            {(editProjectDraft.images ?? []).map((url, idx) => (
-                              <li key={idx} className="relative group">
-                                <div className="w-20 h-20 rounded-lg overflow-hidden border border-[var(--color-border)] bg-[var(--color-card)]">
-                                  <img 
-                                    src={url} 
-                                    alt="" 
-                                    className="w-full h-full object-cover"
-                                    onError={(e) => {
-                                      console.error("Failed to load image:", url);
-                                      e.currentTarget.style.display = 'none';
-                                      e.currentTarget.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-xs text-red-500">Failed</div>';
-                                    }}
-                                  />
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setEditProjectDraft({
-                                      ...editProjectDraft,
-                                      images: (editProjectDraft.images ?? []).filter((_, i) => i !== idx),
-                                    })
-                                  }
-                                  className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500/90 text-white text-xs leading-none flex items-center justify-center hover:bg-red-600 shadow"
-                                  aria-label="Remove image"
-                                >
-                                  ×
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                        {Object.keys(imageProgressMap).length > 0 && (
-                          <div className="space-y-2 mb-3">
-                            <label className="block text-xs font-medium opacity-70">Uploading...</label>
-                            <div className="space-y-2">
-                              {Object.entries(imageProgressMap).map(([key, progress]) => (
-                                <div key={key} className="space-y-1">
-                                  <div className="flex justify-between items-center text-xs opacity-60">
-                                    <span>{key}</span>
-                                    <span>{progress}%</span>
-                                  </div>
-                                  <div className="w-full h-2 bg-[var(--color-border)] rounded-full overflow-hidden">
-                                    <div
-                                      className="h-full bg-blue-500 transition-all"
-                                      style={{ width: `${progress}%` }}
-                                    />
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        <label className="inline-flex items-center gap-2 px-3 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded cursor-pointer hover:opacity-90 text-sm">
-                          <input
-                            type="file"
-                            accept="image/*,.gif"
-                            multiple
-                            className="sr-only"
-                            disabled={uploadingImages}
-                            onChange={async (e) => {
-                              const files = e.target.files;
-                              if (!files?.length) return;
-                              const urls = await uploadMultipleImages(files);
-                              if (urls.length) setEditProjectDraft({ ...editProjectDraft, images: [...(editProjectDraft.images ?? []), ...urls] });
-                              e.target.value = "";
-                            }}
-                          />
-                          {uploadingImages ? "Uploading…" : "Add more images"}
-                        </label>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={saveEditedProject}
-                          disabled={saving}
-                          className="px-4 py-2 bg-[var(--color-text)] text-[var(--color-bg)] rounded text-sm disabled:opacity-50"
-                        >
-                          Save
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => { setEditingProject(null); setEditProjectDraft(null); }}
-                          className="px-4 py-2 border border-[var(--color-border)] rounded text-sm"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => removeProject(section, i)}
-                          className="text-red-600 dark:text-red-400 text-sm hover:underline"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <span className="font-medium">{p.title}</span>
-                        <span className="text-sm opacity-60 ml-2">/project/{p.slug || "—"}</span>
-                      </div>
-                      <div className="flex gap-2">
-                        <Link
-                          href={`/project/${p.slug || ""}`}
-                          target="_blank"
-                          className="text-sm opacity-70 hover:opacity-100"
-                        >
-                          View
-                        </Link>
-                        <button
-                          onClick={() => startEditProject(section, i)}
-                          className="text-sm opacity-70 hover:opacity-100"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => removeProject(section, i)}
-                          disabled={saving}
-                          className="text-red-600 dark:text-red-400 text-sm hover:underline disabled:opacity-50"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </section>
-      </div>
-    </div>
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.15); }
+      `}</style>
+    </main>
   );
 }

@@ -48,3 +48,5 @@ export async function fetchProjectByIdFromApi(id: number): Promise<ApiProject | 
 export function getBaseUrlOrEmpty(): string {
   return process.env.PROJECTS_API_BASE_URL?.replace(/\/$/, "") ?? "";
 }
+
+

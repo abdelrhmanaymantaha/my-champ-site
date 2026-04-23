@@ -76,3 +76,5 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: "Failed to delete project" }, { status: 500 });
   }
 }
+
+

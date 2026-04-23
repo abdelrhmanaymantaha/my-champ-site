@@ -27,10 +27,19 @@ export async function POST(request: Request) {
   }
   try {
     const formData = await request.formData();
+    // Support both single "file" and multiple "files" field names
+    const files = (formData.getAll("files").length > 0 
+      ? formData.getAll("files") 
+      : formData.getAll("file")) as File[];
+    
+    // Create a new FormData for the outgoing fetch to ensure field name consistency if the backend expects "files"
+    const outgoingFormData = new FormData();
+    files.forEach(f => outgoingFormData.append("files", f));
+
     // Upload to private API URL
     const res = await fetch(`${base}/api/upload`, {
       method: "POST",
-      body: formData,
+      body: outgoingFormData,
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) return NextResponse.json(data, { status: res.status });
@@ -49,3 +58,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Failed to upload" }, { status: 500 });
   }
 }
+
+

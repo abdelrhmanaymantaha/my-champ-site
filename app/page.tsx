@@ -17,7 +17,7 @@ export default async function Home() {
       <Section id="projects" title={content.sections.projects}>
         <Projects projects={content.projects} />
       </Section>
-      <Section id="play" title={content.sections.play}>
+      <Section id="play" title={content.sections.play} compact>
         <Play content={content.play} />
       </Section>
       <SocialMedia socialMedia={content.socialMedia} />

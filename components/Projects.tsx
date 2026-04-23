@@ -1,4 +1,3 @@
-import "./Projects.css";
 import Link from "next/link";
 
 type Project = {
@@ -12,45 +11,135 @@ type ProjectsContent = {
   motion: Project[];
 };
 
-function ProjectGrid({ projects, title }: { projects: Project[]; title: string }) {
+export default function Projects({ projects }: { projects: ProjectsContent }) {
   return (
-    <div className="mb-12 sm:mb-16 md:mb-20">
-      <h3 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">{title}</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 pt-4 sm:pt-6 md:pt-8">
-        {projects.map((project, i) => (
-          <Link
-            key={i}
-            href={`/project/${project.slug}`}
-            className="flex flex-col items-center group cursor-pointer"
-          >
-            <div
-              className="h-48 sm:h-56 md:h-64 w-full border rounded-lg overflow-hidden mt-4 sm:mt-6 md:mt-10 shadow-lg transition group-hover:opacity-90 group-hover:shadow-xl"
-              style={{
-                background: "var(--color-card)",
-                borderColor: "var(--color-border)",
-              }}
-            >
-              <img
-                src={project.gif}
-                alt={project.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <h4 className="mt-3 sm:mt-4 text-lg sm:text-xl font-semibold text-center group-hover:opacity-80 transition px-2">
-              {project.title}
-            </h4>
-          </Link>
-        ))}
-      </div>
+    <div className="projects-container">
+      <ProjectGrid projects={projects.branding} title="" />
+      <ProjectGrid projects={projects.motion} title="" />
     </div>
   );
 }
 
-export default function Projects({ projects }: { projects: ProjectsContent }) {
+function ProjectGrid({ projects, title }: { projects: Project[]; title: string }) {
+  if (projects.length === 0) return null;
+
   return (
-    <div className="pt-16 sm:pt-24 md:pt-32">
-      <ProjectGrid projects={projects.branding} title="Branding" />
-      <ProjectGrid projects={projects.motion} title="Motion" />
+    <div className="project-category">
+      {title && <h3 className="project-category__title">{title}</h3>}
+
+      <div className="project-grid">
+        {projects.map((project, i) => (
+          <Link
+            key={i}
+            href={`/project/${project.slug}`}
+            className={`project-card ${i === 0 && projects.length > 2 ? "project-card--featured" : ""}`}
+          >
+            <div className={`project-card__image ${i === 0 && projects.length > 2 ? "project-card__image--featured" : ""}`}>
+              <img
+                src={project.gif}
+                alt={project.title}
+                className="project-card__img"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <div className="project-card__info">
+              <h4 className="project-card__name">{project.title}</h4>
+              <span className="project-card__year">2025</span>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      <style>{`
+        .projects-container {
+          padding: 0 16px;
+        }
+        @media (min-width: 640px) {
+          .projects-container {
+            padding: 0 32px;
+          }
+        }
+        .project-category {
+          margin-bottom: 32px;
+        }
+        .project-category:last-child {
+          margin-bottom: 0;
+        }
+        .project-category__title {
+          font-size: 1.5rem;
+          font-weight: 300;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--color-text-muted);
+          margin: 0 0 48px 0;
+        }
+        .project-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+          gap: 32px 16px;
+        }
+        .project-card {
+          display: block;
+          position: relative;
+          text-decoration: none;
+          color: inherit;
+        }
+        .project-card--featured {
+          grid-column: 1 / -1;
+        }
+        .project-card__image {
+          position: relative;
+          aspect-ratio: 16/10;
+          overflow: hidden;
+          background: #111;
+        }
+        .project-card__image--featured {
+          aspect-ratio: 2.2/1;
+        }
+        .project-card__img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .project-card:hover .project-card__img {
+          transform: scale(1.02);
+        }
+        .project-card__info {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          padding: 8px 0;
+        }
+        .project-card__name {
+          font-size: 1.125rem;
+          font-weight: 700;
+          margin: 0;
+          letter-spacing: -0.02em;
+          color: var(--color-text);
+        }
+        .project-card__year {
+          font-size: 0.75rem;
+          font-weight: 600;
+          color: var(--color-text);
+          flex-shrink: 0;
+          margin-left: 16px;
+        }
+        @media (max-width: 640px) {
+          .project-grid {
+            grid-template-columns: 1fr;
+            gap: 24px;
+          }
+          .project-card--featured {
+            grid-column: span 1;
+          }
+          .project-card__image--featured {
+            aspect-ratio: 4/3;
+          }
+        }
+      `}</style>
     </div>
   );
 }

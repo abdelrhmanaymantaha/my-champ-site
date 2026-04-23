@@ -8,98 +8,206 @@ type NavbarContent = {
 };
 
 export default function Navbar({ content }: { content: NavbarContent }) {
-  const links = ["home", "about", "projects", "play", "contact"];
   const [theme, setTheme] = useState<"dark" | "light">("dark");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const links = ["home", "about", "projects", "play", "contact"];
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const toggleTheme = () => {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   };
 
-  const handleLinkClick = (item: string, e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (item === "contact") {
-      e.preventDefault();
-      window.dispatchEvent(new Event("open-contact"));
-    }
-    setMobileMenuOpen(false);
-  };
-
   return (
     <>
-      <nav className="fixed top-0 left-0 w-full z-50 px-4 sm:px-6 md:px-10 py-4 md:py-6 flex justify-between items-center text-xs uppercase tracking-widest bg-[var(--color-bg)] bg-opacity-95 backdrop-blur-sm">
-        <p className="font-bold text-[10px] sm:text-xs" style={{ color: "var(--color-text)" }}>
-          {content.name}
-        </p>
-        
-        {/* Desktop Menu */}
-        <ul className="hidden md:flex gap-4 opacity-60 items-start justify-between">
-          {links.map((item) => (
-            <li key={item}>
-              <a
-                href={`#${item}`}
-                onClick={(e) => handleLinkClick(item, e)}
-                className="hover:opacity-60 transition"
-              >
-                {item}
-              </a>
-            </li>
-          ))}
-        </ul>
-
-        {/* Desktop Location & Theme */}
-        <div className="hidden md:flex items-center gap-3 opacity-70">
-          <span className="text-[10px] sm:text-xs">{content.location}</span>
-          <button
-            onClick={toggleTheme}
-            aria-label="Toggle theme"
-            className="w-3 h-3 rounded-full bg-current hover:scale-125 transition"
-          />
+      <nav className={`site-nav ${isScrolled ? "scrolled" : ""}`}>
+        <div className="site-nav__left">
+          <a href="#" className="site-nav__name glitch" data-text="PLEASE CALL ME ALEVEN">
+            PLEASE CALL ME ALEVEN
+          </a>
         </div>
-
-        {/* Mobile Menu Button */}
-        <div className="flex md:hidden items-center gap-3">
-          <button
-            onClick={toggleTheme}
-            aria-label="Toggle theme"
-            className="w-3 h-3 rounded-full bg-current"
-          />
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
-            className="w-6 h-6 flex flex-col justify-center items-center gap-1"
-          >
-            <span className={`w-5 h-0.5 bg-current transition-transform ${mobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`} />
-            <span className={`w-5 h-0.5 bg-current transition-opacity ${mobileMenuOpen ? 'opacity-0' : ''}`} />
-            <span className={`w-5 h-0.5 bg-current transition-transform ${mobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`} />
-          </button>
+        <div className="site-center">
+          <ul className="site-nav__links">
+            {links.map((link) => (
+              <li key={link}>
+                <a href={`#${link}`}>{link.toUpperCase()}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="site-nav__right">
+          <p className="site-nav__location">
+            {content.location.toUpperCase()} <button onClick={toggleTheme} className="theme-dot" aria-label="Toggle theme">●</button>
+          </p>
         </div>
       </nav>
 
-      {/* Mobile Menu Dropdown */}
-      {mobileMenuOpen && (
-        <div className="fixed top-16 left-0 w-full z-40 md:hidden bg-[var(--color-bg)] border-b border-[var(--color-border)] shadow-lg">
-          <ul className="flex flex-col py-4 px-6">
-            {links.map((item) => (
-              <li key={item} className="border-b border-[var(--color-border)] last:border-0">
-                <a
-                  href={`#${item}`}
-                  onClick={(e) => handleLinkClick(item, e)}
-                  className="block py-3 hover:opacity-60 transition uppercase text-sm"
-                >
-                  {item}
-                </a>
-              </li>
-            ))}
-            <li className="pt-3 opacity-60 text-xs">
-              {content.location}
-            </li>
-          </ul>
-        </div>
-      )}
+      <style>{`
+        .site-nav {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          z-index: 50;
+          padding: 24px 32px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-size: 0.75rem;
+          font-weight: 700;
+          letter-spacing: 0.05em;
+          background: transparent;
+          color: var(--color-text);
+          mix-blend-mode: difference;
+          transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), mix-blend-mode 0.4s linear, padding 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .site-nav.scrolled {
+          background: #000;
+          mix-blend-mode: normal;
+          padding: 16px 32px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .site-nav__left {
+          flex: 1;
+          display: flex;
+          justify-content: flex-start;
+        }
+        
+        .site-center {
+          flex: 1;
+          display: flex;
+          justify-content: center;
+        }
+        
+        .site-nav__right {
+          flex: 1;
+          display: flex;
+          justify-content: flex-end;
+        }
+
+        .site-nav__name {
+          color: #fff;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+
+        .glitch {
+          position: relative;
+        }
+        .glitch::before,
+        .glitch::after {
+          content: attr(data-text);
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          opacity: 0.8;
+          pointer-events: none;
+        }
+        .glitch::before {
+          left: 1.5px;
+          text-shadow: -1px 0 rgba(255, 0, 0, 0.7);
+          color: transparent;
+        }
+        .glitch::after {
+          left: -1.5px;
+          text-shadow: 1px 0 rgba(0, 255, 255, 0.7);
+          color: transparent;
+        }
+
+        .site-nav__location {
+          margin: 0;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: #a0a0a0;
+          white-space: nowrap;
+        }
+
+        .theme-dot {
+          background: none;
+          border: none;
+          color: #888;
+          font-size: 0.8rem;
+          cursor: pointer;
+          padding: 0;
+          display: inline-flex;
+          align-items: center;
+          transition: transform 0.2s, color 0.2s;
+        }
+        .theme-dot:hover {
+          transform: scale(1.5);
+          color: #fff;
+        }
+
+        .site-nav__links {
+          margin: 0;
+          padding: 0;
+          list-style: none;
+          display: flex;
+          gap: 24px;
+        }
+        .site-nav__links a {
+          color: #a0a0a0;
+          text-decoration: none;
+          transition: color 0.2s;
+        }
+        .site-nav__links a:hover {
+          color: #fff;
+        }
+
+        .site-nav.scrolled .site-nav__name,
+        .site-nav.scrolled .site-nav__location,
+        .site-nav.scrolled .site-nav__links a,
+        .site-nav.scrolled .theme-dot {
+          color: #fff; /* Ensure high contrast when bg is explicitly black */
+        }
+        
+        .site-nav.scrolled .site-nav__location,
+        .site-nav.scrolled .site-nav__links a {
+          color: #a0a0a0; /* Revert slight grey for links so hover effect works */
+        }
+        .site-nav.scrolled .site-nav__links a:hover {
+          color: #fff;
+        }
+
+        @media (max-width: 1024px) {
+          .site-nav, .site-nav.scrolled {
+            padding: 20px 24px;
+            font-size: 0.7rem;
+          }
+          .site-nav__links {
+            gap: 16px;
+          }
+        }
+        
+        @media (max-width: 768px) {
+          .site-nav {
+            flex-direction: column;
+            gap: 16px;
+            padding: 24px;
+          }
+          .site-nav.scrolled {
+            padding: 16px 24px;
+          }
+          .site-nav__left, .site-center, .site-nav__right {
+            justify-content: center;
+          }
+        }
+      `}</style>
     </>
   );
 }
