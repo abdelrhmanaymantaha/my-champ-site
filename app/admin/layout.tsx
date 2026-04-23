@@ -1,8 +1,8 @@
 import React from "react";
 
 export const metadata = {
-  title: "Admin | Aleven Studio",
-  description: "Admin dashboard",
+  title: "Admin Login | Champ Studio",
+  description: "Admin login",
 };
 
 export default function AdminLayout({
@@ -11,10 +11,8 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen text-[var(--color-text)] relative flex flex-col items-center w-full overflow-x-hidden">
-      <div className="w-full flex flex-col items-center">
-        {children}
-      </div>
+    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
+      {children}
     </div>
   );
 }
