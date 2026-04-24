@@ -39,7 +39,7 @@ export default function Section({ id, title, children, compact = false }: Props)
           letter-spacing: -0.03em;
           line-height: 1;
           margin: 0 0 32px 0;
-          text-transform: lowercase;
+          text-transform: uppercase;
           color: var(--color-text);
         }
         .page-section--compact .page-section__title {

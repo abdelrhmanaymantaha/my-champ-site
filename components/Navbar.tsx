@@ -68,15 +68,22 @@ export default function Navbar({ content }: { content: NavbarContent }) {
           letter-spacing: 0.05em;
           background: transparent;
           color: var(--color-text);
-          mix-blend-mode: difference;
+          mix-blend-mode: normal;
           transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), mix-blend-mode 0.4s linear, padding 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .site-nav.scrolled {
-          background: #000;
+          background: var(--nav-bg-scrolled);
           mix-blend-mode: normal;
           padding: 16px 32px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          border-bottom: 1px solid var(--color-border);
+          backdrop-filter: blur(10px);
+        }
+
+        /* Keep it readable even before scroll */
+        .site-nav:not(.scrolled) {
+          background: color-mix(in srgb, var(--color-bg) 65%, transparent);
+          backdrop-filter: blur(10px);
         }
 
         .site-nav__left {
@@ -98,7 +105,7 @@ export default function Navbar({ content }: { content: NavbarContent }) {
         }
 
         .site-nav__name {
-          color: #fff;
+          color: var(--color-text);
           text-decoration: none;
           white-space: nowrap;
         }
@@ -133,14 +140,14 @@ export default function Navbar({ content }: { content: NavbarContent }) {
           display: flex;
           align-items: center;
           gap: 8px;
-          color: #a0a0a0;
+          color: var(--color-text-muted);
           white-space: nowrap;
         }
 
         .theme-dot {
           background: none;
           border: none;
-          color: #888;
+          color: var(--color-text-muted);
           font-size: 0.8rem;
           cursor: pointer;
           padding: 0;
@@ -150,7 +157,7 @@ export default function Navbar({ content }: { content: NavbarContent }) {
         }
         .theme-dot:hover {
           transform: scale(1.5);
-          color: #fff;
+          color: var(--color-text);
         }
 
         .site-nav__links {
@@ -161,27 +168,24 @@ export default function Navbar({ content }: { content: NavbarContent }) {
           gap: 24px;
         }
         .site-nav__links a {
-          color: #a0a0a0;
+          color: var(--color-text-muted);
           text-decoration: none;
           transition: color 0.2s;
         }
         .site-nav__links a:hover {
-          color: #fff;
+          color: var(--color-text);
         }
 
-        .site-nav.scrolled .site-nav__name,
+        .site-nav.scrolled .site-nav__name {
+          color: var(--color-text);
+        }
         .site-nav.scrolled .site-nav__location,
         .site-nav.scrolled .site-nav__links a,
         .site-nav.scrolled .theme-dot {
-          color: #fff; /* Ensure high contrast when bg is explicitly black */
-        }
-        
-        .site-nav.scrolled .site-nav__location,
-        .site-nav.scrolled .site-nav__links a {
-          color: #a0a0a0; /* Revert slight grey for links so hover effect works */
+          color: var(--color-text-muted);
         }
         .site-nav.scrolled .site-nav__links a:hover {
-          color: #fff;
+          color: var(--color-text);
         }
 
         @media (max-width: 1024px) {

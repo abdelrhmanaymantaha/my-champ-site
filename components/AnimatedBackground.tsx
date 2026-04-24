@@ -148,6 +148,19 @@ export default function AnimatedBackground() {
           pointer-events: none;
         }
 
+        .anim-bg-base {
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(1200px circle at 20% 10%, rgba(255,255,255,0.06), rgba(0,0,0,0) 55%),
+                      radial-gradient(900px circle at 80% 85%, rgba(255,255,255,0.04), rgba(0,0,0,0) 60%);
+          opacity: 1;
+        }
+
+        :global(html[data-theme="light"]) .anim-bg-base {
+          background: radial-gradient(1200px circle at 20% 10%, rgba(0,0,0,0.05), rgba(255,255,255,0) 55%),
+                      radial-gradient(900px circle at 80% 85%, rgba(0,0,0,0.035), rgba(255,255,255,0) 60%);
+        }
+
         .anim-orb {
           position: absolute;
           border-radius: 50%;
@@ -184,6 +197,12 @@ export default function AnimatedBackground() {
 
         :global(html[data-theme="light"]) .orb-2 {
           background: radial-gradient(circle, rgba(120, 180, 255, 0.3) 0%, rgba(120, 180, 255, 0) 70%);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .anim-orb {
+            transition: none;
+          }
         }
 
       `}</style>
