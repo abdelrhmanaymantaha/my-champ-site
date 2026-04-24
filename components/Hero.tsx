@@ -63,9 +63,16 @@ export default function Hero({ content }: { content: HeroContent }) {
           transition={{ duration: 0.8, delay: 0.3 }}
           className="hero-tagline-container"
         >
-          <p className="hero-tagline">
+          <a
+            href="#projects"
+            className="hero-tagline"
+            onClick={(e) => {
+              e.preventDefault();
+              document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+          >
             The Studio <span>→</span>
-          </p>
+          </a>
         </motion.div>
 
         <motion.div
@@ -135,6 +142,7 @@ export default function Hero({ content }: { content: HeroContent }) {
           display: inline-flex;
           align-items: center;
           gap: 6px;
+          cursor: pointer;
         }
         .hero-tagline span {
           text-decoration: none;

@@ -67,7 +67,10 @@ export default function SocialMedia({ socialMedia }: SocialMediaProps) {
               aria-label={link.name}
               className="social-footer__link"
             >
-              <span>{link.name}</span>
+              <span className="social-footer__icon" aria-hidden="true">
+                {link.icon}
+              </span>
+              <span className="social-footer__text">{link.name}</span>
             </a>
           ))}
         </div>
@@ -82,6 +85,8 @@ export default function SocialMedia({ socialMedia }: SocialMediaProps) {
           display: flex;
           flex-direction: column;
           gap: 64px;
+          align-items: center;
+          text-align: center;
         }
         .social-footer__label {
           font-size: 2rem;
@@ -90,14 +95,15 @@ export default function SocialMedia({ socialMedia }: SocialMediaProps) {
           letter-spacing: -0.05em;
           color: var(--color-text);
           margin: 0;
-          text-transform: lowercase;
+          text-transform: uppercase;
         }
         .social-footer__links {
           display: flex;
           flex-wrap: wrap;
-          gap: 32px 64px;
+          gap: 20px 36px;
           border-top: 1px solid var(--color-border);
           padding-top: 32px;
+          justify-content: center;
         }
         .social-footer__link {
           display: flex;
@@ -107,9 +113,22 @@ export default function SocialMedia({ socialMedia }: SocialMediaProps) {
           font-size: clamp(1.25rem, 2vw, 1.75rem);
           font-weight: 700;
           letter-spacing: -0.02em;
-          text-transform: lowercase;
+          text-transform: uppercase;
           text-decoration: none;
           transition: opacity 0.2s;
+        }
+        .social-footer__icon {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 28px;
+          height: 28px;
+          opacity: 0.85;
+        }
+        .social-footer__icon svg {
+          width: 20px;
+          height: 20px;
+          display: block;
         }
         .social-footer__link:hover {
           opacity: 0.5;

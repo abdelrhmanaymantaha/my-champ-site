@@ -10,7 +10,7 @@ type NavbarContent = {
 export default function Navbar({ content }: { content: NavbarContent }) {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [isScrolled, setIsScrolled] = useState(false);
-  const links = ["home", "about", "projects", "play", "contact"];
+  const links = ["home", "about", "projects", "play", "connect"];
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -40,7 +40,30 @@ export default function Navbar({ content }: { content: NavbarContent }) {
           <ul className="site-nav__links">
             {links.map((link) => (
               <li key={link}>
-                <a href={`#${link}`}>{link.toUpperCase()}</a>
+                <a
+                  href={`#${link}`}
+                  onClick={(e) => {
+                    if (link === "connect") {
+                      e.preventDefault();
+                      const target = Math.max(
+                        document.body.scrollHeight,
+                        document.documentElement.scrollHeight
+                      );
+                      requestAnimationFrame(() => {
+                        window.scrollTo({ top: target, behavior: "smooth" });
+                      });
+                      return;
+                    }
+
+                    const el = document.getElementById(link);
+                    if (el) {
+                      e.preventDefault();
+                      el.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }
+                  }}
+                >
+                  {link.toUpperCase()}
+                </a>
               </li>
             ))}
           </ul>
