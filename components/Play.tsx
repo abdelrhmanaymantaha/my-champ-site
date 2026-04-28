@@ -75,33 +75,30 @@ export default function Play({ content }: { content: PlayContent }) {
 
       {!loading && !error && games.length > 0 && (
         <div className="play-section__content">
-          <div className="play-grid" aria-label="Game number slider">
-            {games.map((game, index) => (
-              <Link
-                key={game.id}
-                href={`/play/${index + 1}`}
-                className={`play-grid__tile ${index === activeIndex ? "is-active" : ""}`}
-                aria-label={`Open game ${index + 1}`}
-                onMouseEnter={() => setActiveIndex(index)}
-                onFocus={() => setActiveIndex(index)}
-              >
-                <span className="play-grid__number">{String(index + 1).padStart(3, "0")}</span>
-              </Link>
-            ))}
-          </div>
-
           {activeGame && (
             <div className="play-preview" aria-live="polite">
-              <div className="play-preview__meta">
-                <span className="play-preview__label">Selected game</span>
-                <span className="play-preview__number">{String(activeIndex + 1).padStart(3, "0")}</span>
-              </div>
               <div className="play-preview__frame">
                 <img
                   src={activeGame.gif_url}
                   alt={`Game ${activeIndex + 1}`}
                   className="play-preview__image"
                 />
+                <div className="play-preview__overlay" aria-label="Game number selector">
+                  <div className="play-grid">
+                    {games.map((game, index) => (
+                      <Link
+                        key={game.id}
+                        href={`/play/${index + 1}`}
+                        className={`play-grid__tile ${index === activeIndex ? "is-active" : ""}`}
+                        aria-label={`Open game ${index + 1}`}
+                        onMouseEnter={() => setActiveIndex(index)}
+                        onFocus={() => setActiveIndex(index)}
+                      >
+                        <span className="play-grid__number">{String(index + 1).padStart(3, "0")}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -154,13 +151,14 @@ export default function Play({ content }: { content: PlayContent }) {
 
         .play-grid {
           display: flex;
-          gap: 14px;
+          gap: 12px;
           overflow-x: auto;
-          padding: 14px 8px 6px;
+          padding: 8px 10px;
           justify-content: center;
           align-items: center;
           scroll-snap-type: x mandatory;
           -webkit-overflow-scrolling: touch;
+          max-width: 100%;
         }
 
         .play-grid::-webkit-scrollbar {
@@ -174,17 +172,18 @@ export default function Play({ content }: { content: PlayContent }) {
 
         .play-grid__tile {
           flex: 0 0 auto;
-          width: 72px;
-          height: 72px;
+          width: 64px;
+          height: 64px;
           border-radius: 999px;
           border: 1px solid var(--color-border);
-          background: color-mix(in srgb, var(--color-card) 84%, transparent);
+          background: color-mix(in srgb, var(--color-card) 88%, transparent);
           display: grid;
           place-items: center;
           cursor: pointer;
           text-decoration: none;
           scroll-snap-align: center;
           transition: transform 200ms ease, background 200ms ease, border-color 200ms ease;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         }
 
         .play-grid__tile:hover,
@@ -207,33 +206,24 @@ export default function Play({ content }: { content: PlayContent }) {
           justify-items: center;
         }
 
-        .play-preview__meta {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .play-preview__label {
-          font-size: 0.8rem;
-          font-weight: 800;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          color: var(--color-text-muted);
-        }
-
-        .play-preview__number {
-          font-size: 0.95rem;
-          font-weight: 800;
-          letter-spacing: 0.08em;
-          color: var(--color-text);
-        }
-
         .play-preview__frame {
+          position: relative;
           width: min(100%, 860px);
           border-radius: 24px;
           border: 1px solid var(--color-border);
           background: var(--color-card);
           overflow: hidden;
+        }
+
+        .play-preview__overlay {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 18px;
+          background: linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.28));
+          backdrop-filter: blur(2px);
         }
 
         .play-preview__image {
@@ -246,13 +236,13 @@ export default function Play({ content }: { content: PlayContent }) {
 
         @media (max-width: 640px) {
           .play-grid {
-            justify-content: flex-start;
-            gap: 12px;
+            justify-content: center;
+            gap: 10px;
           }
 
           .play-grid__tile {
-            width: 56px;
-            height: 56px;
+            width: 54px;
+            height: 54px;
           }
 
           .play-grid__number {
@@ -261,6 +251,10 @@ export default function Play({ content }: { content: PlayContent }) {
 
           .play-preview__frame {
             border-radius: 18px;
+          }
+
+          .play-preview__overlay {
+            padding: 12px;
           }
         }
 
