@@ -21,6 +21,7 @@ export default function Play({ content }: { content: PlayContent }) {
   const [games, setGames] = useState<GameGif[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -40,7 +41,9 @@ export default function Play({ content }: { content: PlayContent }) {
         }
 
         const data = (await response.json()) as GameGif[];
-        setGames(Array.isArray(data) ? data : []);
+        const nextGames = Array.isArray(data) ? data : [];
+        setGames(nextGames);
+        setActiveIndex(0);
       } catch (fetchError) {
         if ((fetchError as Error).name === "AbortError") {
           return;
@@ -57,16 +60,13 @@ export default function Play({ content }: { content: PlayContent }) {
     return () => controller.abort();
   }, []);
 
+  const activeGame = games[activeIndex] ?? games[0] ?? null;
+
   return (
     <div className="play-section">
       <div className="play-section__intro">
         <p className="play-text">{content.text}</p>
-        <div className="play-section__meta">
-          <span className="play-section__label">Games</span>
-          <span className="play-section__count">
-            {loading ? "Loading..." : `${games.length} uploaded`}
-          </span>
-        </div>
+        <span className="play-section__label">Games</span>
       </div>
 
       {loading && <PlaySkeleton />}
@@ -75,19 +75,36 @@ export default function Play({ content }: { content: PlayContent }) {
 
       {!loading && !error && games.length > 0 && (
         <div className="play-section__content">
-          <div className="play-grid" aria-label="Game number grid">
+          <div className="play-grid" aria-label="Game number slider">
             {games.map((game, index) => (
               <Link
                 key={game.id}
                 href={`/play/${index + 1}`}
-                className="play-grid__tile"
+                className={`play-grid__tile ${index === activeIndex ? "is-active" : ""}`}
                 aria-label={`Open game ${index + 1}`}
+                onMouseEnter={() => setActiveIndex(index)}
+                onFocus={() => setActiveIndex(index)}
               >
-                <span className="play-grid__number">{index + 1}</span>
-                <span className="play-grid__label">Open</span>
+                <span className="play-grid__number">{String(index + 1).padStart(3, "0")}</span>
               </Link>
             ))}
           </div>
+
+          {activeGame && (
+            <div className="play-preview" aria-live="polite">
+              <div className="play-preview__meta">
+                <span className="play-preview__label">Selected game</span>
+                <span className="play-preview__number">{String(activeIndex + 1).padStart(3, "0")}</span>
+              </div>
+              <div className="play-preview__frame">
+                <img
+                  src={activeGame.gif_url}
+                  alt={`Game ${activeIndex + 1}`}
+                  className="play-preview__image"
+                />
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -103,9 +120,8 @@ export default function Play({ content }: { content: PlayContent }) {
         }
 
         .play-section__intro {
-          display: flex;
-          flex-direction: column;
-          gap: 18px;
+          display: grid;
+          gap: 14px;
         }
 
         .play-text {
@@ -117,21 +133,12 @@ export default function Play({ content }: { content: PlayContent }) {
           max-width: 65ch;
         }
 
-        .play-section__meta {
-          display: none;
-        }
-
-        .play-section__label,
-        .play-section__count {
+        .play-section__label {
           font-size: 0.8rem;
           font-weight: 800;
           letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--color-text-muted);
-        }
-
-        .play-section__count {
-          color: var(--color-text);
         }
 
         .play-section__state {
@@ -142,57 +149,118 @@ export default function Play({ content }: { content: PlayContent }) {
 
         .play-section__content {
           display: grid;
-          gap: 28px;
+          gap: 24px;
         }
 
         .play-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
-          gap: 12px;
+          display: flex;
+          gap: 14px;
+          overflow-x: auto;
+          padding: 14px 8px 6px;
+          justify-content: center;
+          align-items: center;
+          scroll-snap-type: x mandatory;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .play-grid::-webkit-scrollbar {
+          height: 8px;
+        }
+
+        .play-grid::-webkit-scrollbar-thumb {
+          background: color-mix(in srgb, var(--color-border) 60%, transparent);
+          border-radius: 999px;
         }
 
         .play-grid__tile {
-          appearance: none;
-          aspect-ratio: 1 / 1;
-          border-radius: 20px;
+          flex: 0 0 auto;
+          width: 72px;
+          height: 72px;
+          border-radius: 999px;
           border: 1px solid var(--color-border);
           background: color-mix(in srgb, var(--color-card) 84%, transparent);
-          color: var(--color-text);
-          cursor: pointer;
-          text-decoration: none;
           display: grid;
           place-items: center;
-          gap: 4px;
-          transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+          cursor: pointer;
+          text-decoration: none;
+          scroll-snap-align: center;
+          transition: transform 200ms ease, background 200ms ease, border-color 200ms ease;
         }
 
-        .play-grid__tile:hover {
-          transform: translateY(-2px);
+        .play-grid__tile:hover,
+        .play-grid__tile.is-active {
+          transform: translateY(-3px) scale(1.03);
           border-color: var(--color-text);
+          background: color-mix(in srgb, var(--color-card) 92%, transparent);
         }
 
         .play-grid__number {
-          font-size: clamp(1.4rem, 3vw, 2rem);
+          font-size: 1rem;
           font-weight: 800;
           line-height: 1;
+          color: var(--color-text);
         }
 
-        .play-grid__label {
-          font-size: 0.65rem;
+        .play-preview {
+          display: grid;
+          gap: 14px;
+          justify-items: center;
+        }
+
+        .play-preview__meta {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .play-preview__label {
+          font-size: 0.8rem;
           font-weight: 800;
-          letter-spacing: 0.14em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--color-text-muted);
         }
 
+        .play-preview__number {
+          font-size: 0.95rem;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          color: var(--color-text);
+        }
+
+        .play-preview__frame {
+          width: min(100%, 860px);
+          border-radius: 24px;
+          border: 1px solid var(--color-border);
+          background: var(--color-card);
+          overflow: hidden;
+        }
+
+        .play-preview__image {
+          display: block;
+          width: 100%;
+          max-height: 460px;
+          object-fit: contain;
+          background: #050505;
+        }
+
         @media (max-width: 640px) {
           .play-grid {
-            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
-            gap: 10px;
+            justify-content: flex-start;
+            gap: 12px;
           }
 
           .play-grid__tile {
-            border-radius: 16px;
+            width: 56px;
+            height: 56px;
+          }
+
+          .play-grid__number {
+            font-size: 0.9rem;
+          }
+
+          .play-preview__frame {
+            border-radius: 18px;
           }
         }
 
@@ -226,9 +294,10 @@ function PlaySkeleton() {
         }
 
         .play-skeleton__grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+          display: flex;
           gap: 12px;
+          justify-content: center;
+          flex-wrap: wrap;
         }
 
         .play-skeleton__tile,
@@ -240,13 +309,18 @@ function PlaySkeleton() {
         }
 
         .play-skeleton__tile {
-          aspect-ratio: 1 / 1;
+          width: 56px;
+          height: 56px;
+          border-radius: 999px;
+        }
+
+        .play-skeleton__card {
+          height: 320px;
         }
 
         @media (max-width: 640px) {
-          .play-skeleton__grid {
-            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
-            gap: 10px;
+          .play-skeleton__card {
+            height: 220px;
           }
         }
       `}</style>
