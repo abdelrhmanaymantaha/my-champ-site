@@ -5,7 +5,7 @@ import { motion, easeOut } from "framer-motion";
 const BoyLogo = () => (
   <svg
     viewBox="0 0 100 100"
-    className="boy-logo"
+    className="w-full h-full text-[var(--color-text)]"
     xmlns="http://www.w3.org/2000/svg"
   >
     <circle cx="50" cy="40" r="22" fill="currentColor" />
@@ -54,6 +54,22 @@ export default function Hero({ content }: { content: HeroContent }) {
       >
         <span className="hero-title-text">Aleven</span>
 
+        {/* نفس مكان وأنيميشن الكود التاني */}
+        <motion.div
+          className="hero-boy-logo"
+          initial={{ y: 40, opacity: 0 }}
+          animate={{
+            y: [40, 0, 0, 40],
+            opacity: [0, 1, 1, 0],
+          }}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        >
+          <BoyLogo />
+        </motion.div>
       </motion.div>
 
       <div className="hero-split">
@@ -113,12 +129,16 @@ export default function Hero({ content }: { content: HeroContent }) {
           color: var(--color-text);
           text-align: center;
         }
+
+        /* نفس مكان الكود التاني بالظبط */
         .hero-boy-logo {
           position: absolute;
-          left: 10%;
-          bottom: -15%;
+          left: 15%;
+          bottom: 6%;
           width: clamp(4rem, 15vw, 18rem);
+          pointer-events: none;
         }
+
         .hero-split {
           display: flex;
           flex-direction: column;
@@ -169,9 +189,6 @@ export default function Hero({ content }: { content: HeroContent }) {
         @media (min-width: 1024px) {
           .hero-section {
             padding: 180px 48px 64px;
-          }
-          .hero-boy-logo {
-            left: 5%;
           }
         }
       `}</style>

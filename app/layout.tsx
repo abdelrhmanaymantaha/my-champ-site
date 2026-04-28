@@ -4,7 +4,7 @@ import { getContent } from "@/lib/content";
 import React from "react";
 
 export const metadata = {
-  title: "Champ Studio",
+  title: "Aleven Studio",
   description: "Creative Studio Website",
 };
 
