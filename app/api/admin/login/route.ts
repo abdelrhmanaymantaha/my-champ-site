@@ -25,8 +25,10 @@ export async function POST(request: Request) {
       maxAge: 60 * 60 * 24, // 24 hours
       path: "/",
     });
+    console.log("Admin login successful for:", email);
     return response;
-  } catch {
+  } catch (error) {
+    console.error("Login error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

@@ -213,7 +213,9 @@ export default function AdminDashboardPage() {
                 return;
               }
               console.log("Upload response has no urls array:", data);
-              setMessage({ type: "error", text: "No URL returned from upload. Check console for response." });
+              // Surface backend response to the user so debugging is easier
+              const detailText = JSON.stringify(data);
+              setMessage({ type: "error", text: "No URL returned from upload: " + detailText });
             } else {
               const err = data.error ?? data.detail ?? `Upload failed (${xhr.status})`;
               console.error("Upload error:", err);
@@ -261,7 +263,9 @@ export default function AdminDashboardPage() {
 
   const uploadCoverImage = (file: File) => uploadOneImage(setUploadingCover, setCoverProgress, file);
   const uploadAboutImage = (file: File) => uploadOneImage(setUploadingAboutImage, setAboutImageProgress, file);
-  const uploadGameImage = (file: File) => uploadOneImage(setUploadingGameGif, setGameGifProgress, file, "/api/games/upload");
+  // Use the generic upload proxy (`/api/upload`) which rewrites public URLs
+  // This matches the working tester page and ensures URLs are returned.
+  const uploadGameImage = (file: File) => uploadOneImage(setUploadingGameGif, setGameGifProgress, file, "/api/upload");
 
   const refetchGames = async () => {
     const res = await fetch("/api/games", { cache: "no-store" });

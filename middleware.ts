@@ -9,6 +9,7 @@ export function middleware(request: NextRequest) {
   if (pathname === "/admin/login") return NextResponse.next();
 
   const token = request.cookies.get(ADMIN_SESSION)?.value;
+  // Basic check: token should exist and have the format "payload.signature"
   if (!token || !token.includes(".")) {
     return NextResponse.redirect(new URL("/admin/login", request.url));
   }
