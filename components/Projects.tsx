@@ -14,8 +14,8 @@ type ProjectsContent = {
 export default function Projects({ projects }: { projects: ProjectsContent }) {
   return (
     <div className="projects-container">
-      <ProjectGrid projects={projects.branding} title="" />
-      <ProjectGrid projects={projects.motion} title="" />
+      <ProjectGrid projects={projects.branding} title="Branding" />
+      <ProjectGrid projects={projects.motion} title="Motion" />
     </div>
   );
 }
@@ -32,9 +32,9 @@ function ProjectGrid({ projects, title }: { projects: Project[]; title: string }
           <Link
             key={i}
             href={`/project/${project.slug}`}
-            className={`project-card ${i === 0 && projects.length > 2 ? "project-card--featured" : ""}`}
+            className="project-card"
           >
-            <div className={`project-card__image ${i === 0 && projects.length > 2 ? "project-card__image--featured" : ""}`}>
+            <div className="project-card__image">
               <img
                 src={project.gif}
                 alt={project.title}
@@ -68,8 +68,8 @@ function ProjectGrid({ projects, title }: { projects: Project[]; title: string }
         }
         .project-category__title {
           font-size: 1.5rem;
-          font-weight: 300;
-          letter-spacing: 0.08em;
+          font-weight: 700;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--color-text-muted);
           margin: 0 0 48px 0;
@@ -85,17 +85,11 @@ function ProjectGrid({ projects, title }: { projects: Project[]; title: string }
           text-decoration: none;
           color: inherit;
         }
-        .project-card--featured {
-          grid-column: 1 / -1;
-        }
         .project-card__image {
           position: relative;
-          aspect-ratio: 16/10;
+          aspect-ratio: 4/3;
           overflow: hidden;
           background: #111;
-        }
-        .project-card__image--featured {
-          aspect-ratio: 2.2/1;
         }
         .project-card__img {
           width: 100%;
@@ -131,12 +125,6 @@ function ProjectGrid({ projects, title }: { projects: Project[]; title: string }
           .project-grid {
             grid-template-columns: 1fr;
             gap: 24px;
-          }
-          .project-card--featured {
-            grid-column: span 1;
-          }
-          .project-card__image--featured {
-            aspect-ratio: 4/3;
           }
         }
       `}</style>
