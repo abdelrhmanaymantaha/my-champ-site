@@ -110,6 +110,11 @@ export default function Hero({ content }: { content: HeroContent }) {
           width: 100%;
           height: auto;
           object-fit: contain;
+          transition: filter 0.4s ease;
+        }
+
+        html[data-theme="light"] .hero-logo-image {
+          filter: invert(1);
         }
 
         .hero-split {
