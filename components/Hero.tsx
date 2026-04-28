@@ -2,23 +2,9 @@
 
 import { motion, easeOut } from "framer-motion";
 
-const BoyLogo = () => (
-  <svg
-    viewBox="0 0 100 100"
-    className="w-full h-full text-[var(--color-text)]"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <circle cx="50" cy="40" r="22" fill="currentColor" />
-    <path d="M28 40 Q50 10 72 40" stroke="currentColor" strokeWidth="2" fill="currentColor" />
-    <circle cx="40" cy="40" r="6" stroke="var(--color-bg)" strokeWidth="2" fill="none" />
-    <circle cx="60" cy="40" r="6" stroke="var(--color-bg)" strokeWidth="2" fill="none" />
-    <line x1="46" y1="40" x2="54" y2="40" stroke="var(--color-bg)" strokeWidth="2" />
-    <path d="M40 50 Q50 58 60 50" stroke="var(--color-bg)" strokeWidth="2" fill="none" />
-  </svg>
-);
-
 type HeroContent = {
   title: string;
+  logo?: string;
   tagline: string;
   bulletPoints: string[];
 };
@@ -52,23 +38,13 @@ export default function Hero({ content }: { content: HeroContent }) {
         transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
         className="hero-title-wrapper"
       >
-        <span className="hero-title-text">Aleven</span>
-
-        {/* نفس مكان وأنيميشن الكود التاني */}
         <motion.div
           className="hero-boy-logo"
-          initial={{ y: 40, opacity: 0 }}
-          animate={{
-            y: [40, 0, 0, 40],
-            opacity: [0, 1, 1, 0],
-          }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
         >
-          <BoyLogo />
+          <img src={content.logo || "/aleven-logo.svg"} alt={content.title} className="hero-logo-image" />
         </motion.div>
       </motion.div>
 
@@ -108,45 +84,42 @@ export default function Hero({ content }: { content: HeroContent }) {
           min-height: 100vh;
           display: flex;
           flex-direction: column;
-          padding: 160px 24px 64px;
+          padding: 88px 24px 40px;
           background: transparent;
           position: relative;
           overflow: hidden;
         }
         .hero-title-wrapper {
-          position: relative;
           display: flex;
+          align-items: center;
           justify-content: center;
-          margin-bottom: 64px;
+          min-height: clamp(200px, 32vh, 420px);
+          margin-bottom: 16px;
           width: 100%;
         }
-        .hero-title-text {
-          font-size: clamp(6rem, 28vw, 36rem);
-          font-weight: 800;
-          line-height: 0.72;
-          letter-spacing: -0.06em;
-          margin: 0;
-          color: var(--color-text);
-          text-align: center;
+        .hero-boy-logo {
+          width: min(92vw, 1200px);
+          max-width: 100%;
+          margin-top: 28px;
+          transform: none;
+          pointer-events: none;
         }
 
-        /* نفس مكان الكود التاني بالظبط */
-        .hero-boy-logo {
-          position: absolute;
-          left: 15%;
-          bottom: 6%;
-          width: clamp(4rem, 15vw, 18rem);
-          pointer-events: none;
+        .hero-logo-image {
+          display: block;
+          width: 100%;
+          height: auto;
+          object-fit: contain;
         }
 
         .hero-split {
           display: flex;
           flex-direction: column;
-          gap: 32px;
-          margin-top: auto;
+          gap: 24px;
+          margin-top: 12px;
           width: 100%;
           border-top: 1px solid var(--color-border);
-          padding-top: 32px;
+          padding-top: 16px;
         }
         .hero-tagline-container {
           flex: 1;
@@ -189,7 +162,15 @@ export default function Hero({ content }: { content: HeroContent }) {
         }
         @media (min-width: 1024px) {
           .hero-section {
-            padding: 180px 48px 64px;
+            padding: 84px 48px 48px;
+          }
+          .hero-boy-logo {
+            width: min(82vw, 1400px);
+            transform: none;
+          }
+          .hero-title-wrapper {
+            min-height: clamp(220px, 34vh, 480px);
+            margin-bottom: 20px;
           }
         }
       `}</style>

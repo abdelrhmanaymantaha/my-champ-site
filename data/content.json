@@ -1,6 +1,7 @@
 {
   "hero": {
     "title": "Aleven",
+    "logo": "/aleven-logo.svg",
     "tagline": "the studio →",
     "bulletPoints": [
       "Custom animated illustrations tailored to your idea or brand.",

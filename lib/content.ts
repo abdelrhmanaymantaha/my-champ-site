@@ -31,6 +31,7 @@ export type ProjectsContent = {
 
 export type HeroContent = {
   title: string;
+  logo?: string;
   tagline: string;
   bulletPoints: string[];
 };
@@ -70,6 +71,7 @@ export type Content = {
 const defaultContent: Content = {
   hero: {
     title: "Alevev",
+    logo: "/aleven-logo.svg",
     tagline: "the studio →",
     bulletPoints: [
       "Custom animated illustrations tailored to your idea or brand.",
