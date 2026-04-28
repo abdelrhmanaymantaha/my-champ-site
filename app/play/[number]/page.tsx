@@ -93,17 +93,18 @@ export default async function PlayGamePage({ params }: Props) {
         }
 
         .play-game-page__frame {
+          width: fit-content;
+          margin: 0 auto;
           border: 1px solid var(--color-border);
           border-radius: 28px;
           overflow: hidden;
-          background: var(--color-card);
         }
 
         .play-game-page__image {
-          width: 100%;
           display: block;
-          object-fit: cover;
-          aspect-ratio: 16 / 9;
+          object-fit: contain;
+          max-width: 100%;
+          max-height: 70vh;
         }
 
         @media (max-width: 640px) {

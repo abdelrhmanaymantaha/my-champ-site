@@ -118,13 +118,7 @@ export default function Play({ content }: { content: PlayContent }) {
         }
 
         .play-section__meta {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 16px;
-          max-width: 520px;
-          padding-top: 8px;
-          border-top: 1px solid var(--color-border);
+          display: none;
         }
 
         .play-section__label,
@@ -153,8 +147,8 @@ export default function Play({ content }: { content: PlayContent }) {
 
         .play-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
-          gap: 14px;
+          grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+          gap: 12px;
         }
 
         .play-grid__tile {
@@ -193,7 +187,7 @@ export default function Play({ content }: { content: PlayContent }) {
 
         @media (max-width: 640px) {
           .play-grid {
-            grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
             gap: 10px;
           }
 
@@ -233,8 +227,8 @@ function PlaySkeleton() {
 
         .play-skeleton__grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
-          gap: 14px;
+          grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+          gap: 12px;
         }
 
         .play-skeleton__tile,
@@ -251,7 +245,7 @@ function PlaySkeleton() {
 
         @media (max-width: 640px) {
           .play-skeleton__grid {
-            grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
             gap: 10px;
           }
         }
