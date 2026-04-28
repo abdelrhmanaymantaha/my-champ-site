@@ -6,6 +6,8 @@ import About from "@/components/AboutSection";
 import SocialMedia from "@/components/SocialMedia";
 import { getContentWithProjects } from "@/lib/content";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const content = await getContentWithProjects();
   return (
