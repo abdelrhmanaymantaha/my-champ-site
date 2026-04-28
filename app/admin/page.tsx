@@ -200,22 +200,29 @@ export default function AdminDashboardPage() {
             if (setProgress) setProgress(100);
             
             const text = xhr.responseText || "{}";
+            console.log("Upload response status:", xhr.status);
+            console.log("Upload response text:", text);
+            
             const data = JSON.parse(text) as { urls?: string[]; error?: unknown; detail?: unknown };
             if (xhr.status >= 200 && xhr.status < 300) {
               const urls = data.urls as string[] | undefined;
               const url = urls?.[0];
               if (url) {
+                console.log("Upload successful, URL:", url);
                 resolve(url);
                 return;
               }
-              setMessage({ type: "error", text: "No URL returned from upload" });
+              console.log("Upload response has no urls array:", data);
+              setMessage({ type: "error", text: "No URL returned from upload. Check console for response." });
             } else {
               const err = data.error ?? data.detail ?? `Upload failed (${xhr.status})`;
+              console.error("Upload error:", err);
               setMessage({ type: "error", text: typeof err === "string" ? err : JSON.stringify(err) });
             }
             resolve(null);
-          } catch {
-            setMessage({ type: "error", text: "Invalid response from upload" });
+          } catch (e) {
+            console.error("Parse error:", e);
+            setMessage({ type: "error", text: "Invalid response from upload: " + String(e) });
             resolve(null);
           } finally {
             setUploading(false);
@@ -227,7 +234,16 @@ export default function AdminDashboardPage() {
         };
 
         xhr.onerror = () => {
+          console.error("Network error during upload");
           setMessage({ type: "error", text: "Network error during upload" });
+          setUploading(false);
+          if (setProgress) setProgress(0);
+          resolve(null);
+        };
+
+        xhr.ontimeout = () => {
+          console.error("Upload timeout");
+          setMessage({ type: "error", text: "Upload timeout - try again" });
           setUploading(false);
           if (setProgress) setProgress(0);
           resolve(null);
