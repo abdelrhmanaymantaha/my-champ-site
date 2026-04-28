@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Navbar from "./Navbar";
 import AnimatedBackground from "./AnimatedBackground";
+import ContactModal from "./ContactModal";
 
 type NavbarContent = {
   name: string;
@@ -24,6 +25,7 @@ export default function LayoutWrapper({
       {!isAdminRoute && <AnimatedBackground />}
       {!isAdminRoute && <Navbar content={navbarContent} />}
       {children}
+      {!isAdminRoute && <ContactModal />}
     </>
   );
 }

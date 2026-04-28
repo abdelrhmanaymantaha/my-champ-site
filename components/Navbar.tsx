@@ -10,7 +10,7 @@ type NavbarContent = {
 export default function Navbar({ content }: { content: NavbarContent }) {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [isScrolled, setIsScrolled] = useState(false);
-  const links = ["home", "about", "projects", "play", "connect"];
+  const links = ["home", "about", "projects", "play", "contact"];
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -43,15 +43,9 @@ export default function Navbar({ content }: { content: NavbarContent }) {
                 <a
                   href={`#${link}`}
                   onClick={(e) => {
-                    if (link === "connect") {
+                    if (link === "contact") {
                       e.preventDefault();
-                      const target = Math.max(
-                        document.body.scrollHeight,
-                        document.documentElement.scrollHeight
-                      );
-                      requestAnimationFrame(() => {
-                        window.scrollTo({ top: target, behavior: "smooth" });
-                      });
+                      window.dispatchEvent(new Event("open-contact"));
                       return;
                     }
 
