@@ -39,7 +39,6 @@ export default async function PlayGamePage({ params }: Props) {
 
         <div className="play-game-page__header">
           <p className="play-game-page__eyebrow">GIF {index}</p>
-          <h1 className="play-game-page__title">Uploaded game {index}</h1>
         </div>
 
         <div className="play-game-page__frame">
