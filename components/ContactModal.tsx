@@ -37,8 +37,8 @@ export default function ContactModal() {
 
         <div className="contact-modal__header">
           <p className="contact-modal__eyebrow">contact</p>
-          <h2 className="contact-modal__title">Start a project</h2>
-          <p className="contact-modal__copy">Share a short brief and I’ll get back to you.</p>
+          <h2 className="contact-modal__title">Leave a message</h2>
+          <p className="contact-modal__copy">How can I help you? Share a short brief and I’ll get back to you.</p>
         </div>
 
         <ContactForm onSubmit={() => setOpen(false)} />
