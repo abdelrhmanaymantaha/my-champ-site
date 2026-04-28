@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { fetchGamesFromApi } from "@/lib/games-api";
+import BackToPlay from "./back-to-play";
+import DownloadButton from "./download-button";
 
 type Props = {
   params: Promise<{ number: string }>;
@@ -33,12 +34,11 @@ export default async function PlayGamePage({ params }: Props) {
   return (
     <main className="play-game-page">
       <div className="play-game-page__inner">
-        <Link href="/#play" className="play-game-page__back">
-          ← Back to Play
-        </Link>
+        <BackToPlay />
 
         <div className="play-game-page__header">
           <p className="play-game-page__eyebrow">GIF {index}</p>
+          <DownloadButton gifUrl={game.gif_url} gifNumber={index} />
         </div>
 
         <div className="play-game-page__frame">

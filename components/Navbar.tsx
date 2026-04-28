@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 type NavbarContent = {
   name: string;
@@ -10,6 +11,8 @@ type NavbarContent = {
 export default function Navbar({ content }: { content: NavbarContent }) {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
+  const isHomePage = pathname === "/";
   const links = ["home", "about", "projects", "play", "contact"];
 
   useEffect(() => {
@@ -32,7 +35,17 @@ export default function Navbar({ content }: { content: NavbarContent }) {
     <>
       <nav className={`site-nav ${isScrolled ? "scrolled" : ""}`}>
         <div className="site-nav__left">
-          <a href="#" className="site-nav__name glitch" data-text="PLEASE CALL ME ALEVEN">
+          <a
+            href={isHomePage ? "#home" : "/"}
+            className="site-nav__name glitch"
+            data-text="PLEASE CALL ME ALEVEN"
+            onClick={(e) => {
+              if (isHomePage) {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+            }}
+          >
             PLEASE CALL ME ALEVEN
           </a>
         </div>
@@ -41,11 +54,25 @@ export default function Navbar({ content }: { content: NavbarContent }) {
             {links.map((link) => (
               <li key={link}>
                 <a
-                  href={`#${link}`}
+                  href={
+                    link === "contact"
+                      ? "#contact"
+                      : isHomePage
+                        ? link === "home"
+                          ? "/"
+                          : `#${link}`
+                        : link === "home"
+                          ? "/"
+                          : `/#${link}`
+                  }
                   onClick={(e) => {
                     if (link === "contact") {
                       e.preventDefault();
                       window.dispatchEvent(new Event("open-contact"));
+                      return;
+                    }
+
+                    if (!isHomePage) {
                       return;
                     }
 

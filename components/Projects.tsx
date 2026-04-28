@@ -76,7 +76,7 @@ function ProjectGrid({ projects, title }: { projects: Project[]; title: string }
         }
         .project-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+          grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 32px 16px;
         }
         .project-card {
@@ -127,6 +127,18 @@ function ProjectGrid({ projects, title }: { projects: Project[]; title: string }
           .project-grid {
             grid-template-columns: 1fr;
             gap: 24px;
+          }
+        }
+
+        @media (max-width: 1200px) and (min-width: 641px) {
+          .project-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+        }
+
+        @media (min-width: 1201px) {
+          .project-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
           }
         }
       `}</style>
