@@ -36,6 +36,7 @@ export default function Section({ id, title, children, compact = false }: Props)
         .page-section__title {
           font-size: clamp(3rem, 7vw, 5rem);
           font-weight: 800;
+          font-family: "Degular Display", "Geist", system-ui, sans-serif;
           letter-spacing: -0.03em;
           line-height: 1;
           margin: 0 0 32px 0;

@@ -38,7 +38,7 @@ export default function Navbar({ content }: { content: NavbarContent }) {
           <a
             href={isHomePage ? "#home" : "/"}
             className="site-nav__name glitch"
-            data-text="PLEASE CALL ME ALEVEN"
+            data-text="ALEVEN"
             onClick={(e) => {
               if (isHomePage) {
                 e.preventDefault();
@@ -46,7 +46,7 @@ export default function Navbar({ content }: { content: NavbarContent }) {
               }
             }}
           >
-            PLEASE CALL ME ALEVEN
+            ALEVEN
           </a>
         </div>
         <div className="site-center">

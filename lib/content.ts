@@ -98,7 +98,7 @@ const defaultContent: Content = {
     text: "A creative playground for experimental visuals, animations, and interactive ideas.",
   },
   navbar: {
-    name: "Please call me Alevev",
+    name: "Alevev",
     location: "Los Angeles, CA",
   },
   sections: {

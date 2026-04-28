@@ -69,6 +69,7 @@ function ProjectGrid({ projects, title }: { projects: Project[]; title: string }
         .project-category__title {
           font-size: 1.5rem;
           font-weight: 700;
+          font-family: "Degular Display", "Geist", system-ui, sans-serif;
           letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--color-text-muted);

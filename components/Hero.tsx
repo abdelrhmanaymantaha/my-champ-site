@@ -175,6 +175,7 @@ export default function Hero({ content }: { content: HeroContent }) {
           font-size: clamp(1.5rem, 3.5vw, 3.5rem);
           font-weight: 700;
           line-height: 1.1;
+          font-family: "Degular Display", "Geist", system-ui, sans-serif;
           color: var(--color-text);
           margin: 0;
           letter-spacing: -0.02em;
