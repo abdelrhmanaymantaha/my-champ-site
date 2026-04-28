@@ -56,6 +56,11 @@ type SocialMedia = {
   instagram?: string;
 };
 
+type GameGif = {
+  id: number;
+  gif_url: string;
+};
+
 type Content = {
   hero: HeroContent;
   about: AboutContent;
@@ -69,6 +74,8 @@ type Content = {
 export default function AdminDashboardPage() {
   const [content, setContent] = useState<Content | null>(null);
   const [loading, setLoading] = useState(true);
+  const [games, setGames] = useState<GameGif[]>([]);
+  const [gamesLoading, setGamesLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [newProject, setNewProject] = useState({ title: "", slug: "", description: "", gif: "", images: [] as string[], section: "branding" as "branding" | "motion" });
@@ -80,6 +87,12 @@ export default function AdminDashboardPage() {
   const [imageProgressMap, setImageProgressMap] = useState<Record<string, number>>({});
   const [uploadingAboutImage, setUploadingAboutImage] = useState(false);
   const [aboutImageProgress, setAboutImageProgress] = useState(0);
+  const [newGameGif, setNewGameGif] = useState("");
+  const [editingGameId, setEditingGameId] = useState<number | null>(null);
+  const [editGameGif, setEditGameGif] = useState("");
+  const [uploadingGameGif, setUploadingGameGif] = useState(false);
+  const [gameGifProgress, setGameGifProgress] = useState(0);
+  const [gamesSaving, setGamesSaving] = useState(false);
 
   useEffect(() => {
     fetch("/api/admin/content")
@@ -87,6 +100,24 @@ export default function AdminDashboardPage() {
       .then(setContent)
       .catch(() => setMessage({ type: "error", text: "Failed to load content" }))
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const loadGames = async () => {
+      try {
+        setGamesLoading(true);
+        const res = await fetch("/api/games", { cache: "no-store" });
+        if (!res.ok) throw new Error("Failed to load games");
+        const data = (await res.json()) as GameGif[];
+        setGames(Array.isArray(data) ? data : []);
+      } catch {
+        setGames([]);
+      } finally {
+        setGamesLoading(false);
+      }
+    };
+
+    void loadGames();
   }, []);
 
   const save = async (payload: Partial<Content>) => {
@@ -138,7 +169,12 @@ export default function AdminDashboardPage() {
     return images.map((s) => s.trim()).filter(Boolean);
   };
 
-  const uploadOneImage = async (setUploading: (v: boolean) => void, setProgress?: (pct: number) => void, file?: File): Promise<string | null> => {
+  const uploadOneImage = async (
+    setUploading: (v: boolean) => void,
+    setProgress?: (pct: number) => void,
+    file?: File,
+    uploadPath = "/api/upload"
+  ): Promise<string | null> => {
     if (!file) return null;
     const formData = new FormData();
     formData.append("file", file);
@@ -146,7 +182,7 @@ export default function AdminDashboardPage() {
     setMessage(null);
     try {
       const xhr = new XMLHttpRequest();
-      xhr.open("POST", "/api/upload");
+      xhr.open("POST", uploadPath);
       xhr.responseType = "text";
 
       xhr.upload.onprogress = (event) => {
@@ -209,6 +245,107 @@ export default function AdminDashboardPage() {
 
   const uploadCoverImage = (file: File) => uploadOneImage(setUploadingCover, setCoverProgress, file);
   const uploadAboutImage = (file: File) => uploadOneImage(setUploadingAboutImage, setAboutImageProgress, file);
+  const uploadGameImage = (file: File) => uploadOneImage(setUploadingGameGif, setGameGifProgress, file, "/api/games/upload");
+
+  const refetchGames = async () => {
+    const res = await fetch("/api/games", { cache: "no-store" });
+    if (res.ok) {
+      const data = (await res.json()) as GameGif[];
+      setGames(Array.isArray(data) ? data : []);
+    }
+  };
+
+  const addGame = async () => {
+    const gif_url = newGameGif.trim();
+    if (!gif_url) {
+      setMessage({ type: "error", text: "Please upload or paste a GIF URL." });
+      return;
+    }
+    setGamesSaving(true);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/games", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gif_url }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg = (data as { detail?: unknown; message?: unknown; error?: unknown }).detail
+          ?? (data as { detail?: unknown; message?: unknown; error?: unknown }).message
+          ?? (data as { detail?: unknown; message?: unknown; error?: unknown }).error
+          ?? "Failed to add game";
+        const text = Array.isArray(msg) ? msg.map((x: { msg?: string }) => x.msg ?? JSON.stringify(x)).join(", ") : String(msg);
+        throw new Error(text);
+      }
+      setNewGameGif("");
+      setMessage({ type: "success", text: "Game added!" });
+      await refetchGames();
+    } catch (err) {
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to add game" });
+    } finally {
+      setGamesSaving(false);
+    }
+  };
+
+  const startEditGame = (game: GameGif) => {
+    setEditingGameId(game.id);
+    setEditGameGif(game.gif_url);
+  };
+
+  const saveEditedGame = async () => {
+    if (editingGameId == null) return;
+    const gif_url = editGameGif.trim();
+    if (!gif_url) {
+      setMessage({ type: "error", text: "Please provide a GIF URL." });
+      return;
+    }
+    setGamesSaving(true);
+    setMessage(null);
+    try {
+      const res = await fetch(`/api/games/${editingGameId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gif_url }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg = (data as { detail?: unknown; message?: unknown; error?: unknown }).detail
+          ?? (data as { detail?: unknown; message?: unknown; error?: unknown }).message
+          ?? (data as { detail?: unknown; message?: unknown; error?: unknown }).error
+          ?? "Failed to update game";
+        const text = Array.isArray(msg) ? msg.map((x: { msg?: string }) => x.msg ?? JSON.stringify(x)).join(", ") : String(msg);
+        throw new Error(text);
+      }
+      setEditingGameId(null);
+      setEditGameGif("");
+      setMessage({ type: "success", text: "Game updated!" });
+      await refetchGames();
+    } catch (err) {
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to update game" });
+    } finally {
+      setGamesSaving(false);
+    }
+  };
+
+  const removeGame = async (gameId: number) => {
+    setGamesSaving(true);
+    setMessage(null);
+    try {
+      const res = await fetch(`/api/games/${gameId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete game");
+      setMessage({ type: "success", text: "Game deleted!" });
+      if (editingGameId === gameId) {
+        setEditingGameId(null);
+        setEditGameGif("");
+      }
+      await refetchGames();
+    } catch {
+      setMessage({ type: "error", text: "Failed to delete game" });
+    } finally {
+      setGamesSaving(false);
+    }
+  };
 
   const uploadMultipleImages = async (files: FileList | File[]): Promise<string[]> => {
     const fileArray = Array.from(files);
@@ -769,6 +906,194 @@ export default function AdminDashboardPage() {
             />
           </div>
         </div>
+      </section>
+
+      {/* Games / GIFs */}
+      <section className="mb-16">
+        <h2 className="text-xl font-semibold mb-6">Games / GIFs</h2>
+        <p className="text-sm opacity-70 mb-4">
+          Upload, view, and edit the GIFs that power the Play section. The numbered grid on the site follows this list.
+        </p>
+
+        <div className="space-y-4 mb-8">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">GIF URL</label>
+            <input
+              type="url"
+              value={newGameGif}
+              onChange={(e) => setNewGameGif(e.target.value)}
+              placeholder="Paste a GIF URL or upload one from your computer"
+              className="w-full px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">Upload GIF from computer</label>
+            {gameGifProgress > 0 && gameGifProgress < 100 && (
+              <div className="space-y-1 max-w-md">
+                <div className="flex justify-between items-center text-xs opacity-60">
+                  <span>Uploading GIF...</span>
+                  <span>{gameGifProgress}%</span>
+                </div>
+                <div className="w-full h-2 bg-[var(--color-border)] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-blue-500 transition-all"
+                    style={{ width: `${gameGifProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+            <div className="flex flex-wrap gap-2 items-center">
+              <label className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded cursor-pointer hover:opacity-90">
+                <input
+                  type="file"
+                  accept="image/gif,.gif"
+                  className="sr-only"
+                  disabled={uploadingGameGif}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const url = await uploadGameImage(file);
+                    if (url) setNewGameGif(url);
+                    e.target.value = "";
+                  }}
+                />
+                {uploadingGameGif ? "Uploading…" : "Upload GIF"}
+              </label>
+              <button
+                type="button"
+                onClick={addGame}
+                disabled={gamesSaving || uploadingGameGif || !newGameGif.trim()}
+                className="px-6 py-2 bg-[var(--color-text)] text-[var(--color-bg)] rounded font-medium disabled:opacity-50"
+              >
+                {gamesSaving ? "Adding…" : "Add GIF"}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {gamesLoading ? (
+          <p className="text-sm opacity-70">Loading uploaded GIFs...</p>
+        ) : games.length === 0 ? (
+          <p className="text-sm opacity-70">No GIFs uploaded yet.</p>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {games.map((game, index) => {
+              const isEditing = editingGameId === game.id;
+              return (
+                <div key={game.id} className="p-4 border border-[var(--color-border)] rounded-lg bg-[var(--color-card)]">
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] opacity-60 mb-1">GIF #{index + 1}</p>
+                      <p className="text-sm opacity-70 break-all">ID: {game.id}</p>
+                    </div>
+                    <span className="text-xs px-2 py-1 rounded-full border border-[var(--color-border)] opacity-70">
+                      {index + 1}
+                    </span>
+                  </div>
+
+                  <div className="rounded-lg overflow-hidden border border-[var(--color-border)] bg-black mb-3">
+                    <img src={isEditing ? editGameGif || game.gif_url : game.gif_url} alt={`GIF ${index + 1}`} className="w-full aspect-video object-cover block" />
+                  </div>
+
+                  {isEditing ? (
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <label className="block text-xs mb-1">GIF URL</label>
+                        <input
+                          type="url"
+                          value={editGameGif}
+                          onChange={(e) => setEditGameGif(e.target.value)}
+                          className="w-full px-4 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-xs mb-1">Replace with upload</label>
+                        {gameGifProgress > 0 && gameGifProgress < 100 && (
+                          <div className="space-y-1">
+                            <div className="flex justify-between items-center text-xs opacity-60">
+                              <span>Uploading GIF...</span>
+                              <span>{gameGifProgress}%</span>
+                            </div>
+                            <div className="w-full h-2 bg-[var(--color-border)] rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-blue-500 transition-all"
+                                style={{ width: `${gameGifProgress}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
+                        <label className="inline-flex items-center gap-2 px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded cursor-pointer hover:opacity-90 text-sm">
+                          <input
+                            type="file"
+                            accept="image/gif,.gif"
+                            className="sr-only"
+                            disabled={uploadingGameGif}
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              const url = await uploadGameImage(file);
+                              if (url) setEditGameGif(url);
+                              e.target.value = "";
+                            }}
+                          />
+                          {uploadingGameGif ? "Uploading…" : "Upload new GIF"}
+                        </label>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={saveEditedGame}
+                          disabled={gamesSaving}
+                          className="px-4 py-2 bg-[var(--color-text)] text-[var(--color-bg)] rounded text-sm disabled:opacity-50"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingGameId(null);
+                            setEditGameGif("");
+                          }}
+                          className="px-4 py-2 border border-[var(--color-border)] rounded text-sm"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeGame(game.id)}
+                          disabled={gamesSaving}
+                          className="text-red-600 dark:text-red-400 text-sm hover:underline disabled:opacity-50"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2 justify-between items-center">
+                      <span className="text-xs break-all opacity-70">{game.gif_url}</span>
+                      <div className="flex gap-2">
+                        <a href={game.gif_url} target="_blank" rel="noreferrer" className="text-sm opacity-70 hover:opacity-100">
+                          View
+                        </a>
+                        <button onClick={() => startEditGame(game)} className="text-sm opacity-70 hover:opacity-100">
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => removeGame(game.id)}
+                          disabled={gamesSaving}
+                          className="text-red-600 dark:text-red-400 text-sm hover:underline disabled:opacity-50"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* Projects */}
