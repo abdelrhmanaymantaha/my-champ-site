@@ -90,6 +90,7 @@ function ProjectGrid({ projects, title }: { projects: Project[]; title: string }
           aspect-ratio: 4/3;
           overflow: hidden;
           background: #111;
+          border-radius: 12px;
         }
         .project-card__img {
           width: 100%;
@@ -97,6 +98,7 @@ function ProjectGrid({ projects, title }: { projects: Project[]; title: string }
           object-fit: cover;
           display: block;
           transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+          border-radius: 12px;
         }
         .project-card:hover .project-card__img {
           transform: scale(1.02);
